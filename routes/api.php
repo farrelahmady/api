@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserCustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('customer')->group(function () {
+  Route::post('register', [UserCustomerController::class, 'register']);
+  Route::post('login', [UserCustomerController::class, 'login']);
+  Route::post('logout', [UserCustomerController::class, 'logout'])->middleware('auth:sanctum');
 });
