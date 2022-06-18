@@ -15,13 +15,13 @@ return new class extends Migration
   {
     Schema::create('user_tailor_details', function (Blueprint $table) {
       $table->id();
-      $table->foreignId('tailor_id')->references('id')->on('user_tailors');
+      $table->foreignId('user_tailor_id')->references('id')->on('user_tailors');
       $table->string('first_name');
       $table->string('last_name');
       $table->string('profile_picture')->nullable()->default('/tailor/profile/default.png');
       $table->string('address')->nullable();
       $table->string('phone_number', 15)->nullable();
-      $table->string('speciality');
+      $table->string('speciality')->nullable();
       $table->timestamps();
       $table->softDeletes();
     });

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserTailorController;
 use App\Http\Controllers\UserCustomerController;
 
 /*
@@ -19,4 +20,9 @@ Route::prefix('customer')->group(function () {
   Route::post('register', [UserCustomerController::class, 'register']);
   Route::post('login', [UserCustomerController::class, 'login']);
   Route::post('logout', [UserCustomerController::class, 'logout'])->middleware('auth:sanctum');
+});
+Route::prefix('tailor')->group(function () {
+  Route::post('register', [UserTailorController::class, 'register']);
+  Route::post('login', [UserTailorController::class, 'login']);
+  Route::post('logout', [UserTailorController::class, 'logout'])->middleware('auth:sanctum');
 });

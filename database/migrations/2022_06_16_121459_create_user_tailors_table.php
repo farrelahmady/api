@@ -17,7 +17,7 @@ return new class extends Migration
       $table->id();
       $table->string('email')->unique();
       $table->string('password');
-      $table->integer('max_schedule_slot');
+      $table->integer('max_schedule_slot')->default(3);
       $table->integer('transaction_id')->nullable();
       $table->timestamps();
       $table->softDeletes();
