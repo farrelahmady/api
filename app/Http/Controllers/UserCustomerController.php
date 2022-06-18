@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use GuzzleHttp\Middleware;
 use App\Models\UserCustomer;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseFormatter;
 use App\Models\UserCustomerDetail;
-use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserCustomerController extends Controller
@@ -25,7 +26,7 @@ class UserCustomerController extends Controller
         'last_name' => 'required|string|max:255',
         'address' => 'nullable|string|max:255',
         'phone_number' => 'nullable|string|max:255',
-        'profile_picture' => ['image', 'size:2048']
+        'profile_picture' => ['image']
       ]);
 
       if ($validator->fails()) {
@@ -36,13 +37,16 @@ class UserCustomerController extends Controller
         'email' => $request->email,
         'password' => Hash::make($request->password)
       ])->id;
+
+      $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/customer/profile', 'public')) : null;
+
       UserCustomerDetail::create([
         'user_customer_id' => $userCustomer,
         'first_name' => $request->first_name,
         'last_name' => $request->last_name,
         'address' => $request->address,
         'phone_number' => $request->phone_number,
-        'profile_picture' => $request->profile_picture
+        'profile_picture' => $image
       ]);
 
       $userCustomer = UserCustomer::with('userCustomerDetail')->find($userCustomer);
@@ -79,7 +83,7 @@ class UserCustomerController extends Controller
       ]);
 
       if ($validator->fails()) {
-        return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 500);
+        return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 401);
       }
 
 
@@ -87,7 +91,7 @@ class UserCustomerController extends Controller
       if (!Auth::guard('userCustomers')->attempt($credetials)) {
         return ResponseFormatter::error([
           'message' => 'Unauthorized'
-        ], 'Authentication Failed', 500);
+        ], 'Authentication Failed', 401);
       }
 
       $user = UserCustomer::with('userCustomerDetail')->find(Auth::guard('userCustomers')->user()->id);

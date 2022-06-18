@@ -36,13 +36,16 @@ class UserTailorController extends Controller
         'email' => $request->email,
         'password' => Hash::make($request->password)
       ])->id;
+
+      $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/tailor/profile', 'public')) : null;
+
       UserTailorDetail::create([
         'user_tailor_id' => $userTailor,
         'first_name' => $request->first_name,
         'last_name' => $request->last_name,
         'address' => $request->address,
         'phone_number' => $request->phone_number,
-        'profile_picture' => $request->profile_picture,
+        'profile_picture' => $image,
         'speciality' => $request->speciality
       ]);
 
