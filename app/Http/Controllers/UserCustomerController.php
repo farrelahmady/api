@@ -10,6 +10,7 @@ use App\Helpers\ResponseFormatter;
 use App\Models\UserCustomerDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -20,26 +21,24 @@ class UserCustomerController extends Controller
 
     try {
       $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:6|',
+        'email' => 'required|string|email|max:255|unique:user_customers',
+        'password' => ['required', 'string', Password::min(8)->numbers()],
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'address' => 'nullable|string|max:255',
-        'phone_number' => 'nullable|string|max:255',
-        'profile_picture' => ['image']
+        'phone_number' => 'nullable|string|max:255|min:10',
+        'profile_picture' => ['image', 'max:2048'],
       ]);
 
       if ($validator->fails()) {
         return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 500);
       }
+      $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/customer/profile', 'public')) : null;
 
       $userCustomer = UserCustomer::create([
         'email' => $request->email,
         'password' => Hash::make($request->password)
       ])->id;
-
-      $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/customer/profile', 'public')) : null;
-
       UserCustomerDetail::create([
         'user_customer_id' => $userCustomer,
         'first_name' => $request->first_name,

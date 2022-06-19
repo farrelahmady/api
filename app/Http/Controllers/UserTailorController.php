@@ -10,6 +10,7 @@ use App\Helpers\ResponseFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class UserTailorController extends Controller
 {
@@ -18,13 +19,13 @@ class UserTailorController extends Controller
 
     try {
       $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:6|',
+        'email' => 'required|string|email|max:255|unique:user_tailors',
+        'password' => ['required', 'string', Password::min(8)->numbers()],
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'address' => 'nullable|string|max:255',
-        'phone_number' => 'nullable|string|max:255',
-        'profile_picture' => ['image', 'size:2048'],
+        'phone_number' => 'nullable|string|max:255|min:10',
+        'profile_picture' => ['image', 'max:2048'],
         'speciality' => 'nullable|string|max:255'
       ]);
 
