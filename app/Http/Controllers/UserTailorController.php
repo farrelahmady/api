@@ -19,7 +19,7 @@ class UserTailorController extends Controller
 
     try {
       $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email|max:255|unique:user_tailors',
+        'email' => 'required|string|email:rfc,dns|max:255|unique:user_tailors',
         'password' => ['required', 'string', Password::min(8)->numbers()],
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
@@ -79,7 +79,7 @@ class UserTailorController extends Controller
 
     try {
       $validator = Validator::make(['email' => $request->email, 'password' => $request->password], [
-        'email' => 'email|required',
+        'email' => 'email:rfc,dns|required',
         'password' => 'required'
       ]);
 
