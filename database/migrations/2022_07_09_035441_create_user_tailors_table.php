@@ -17,8 +17,10 @@ return new class extends Migration
       $table->id();
       $table->string('email')->unique();
       $table->string('password');
-      $table->integer('max_schedule_slot')->default(3);
-      $table->integer('transaction_id')->nullable();
+      $table->smallInteger('max_schedule_slot')->default(3);
+      $table->unsignedBigInteger('transaction_id')->nullable();
+      $table->boolean('is_premium')->default(false);
+      $table->boolean('is_admin')->default(false);
       $table->timestamps();
       $table->softDeletes();
     });

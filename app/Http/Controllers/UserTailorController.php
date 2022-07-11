@@ -2,153 +2,152 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Models\UserTailor;
 use Illuminate\Http\Request;
-use App\Models\UserTailorDetail;
+use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Password;
+use App\Http\Requests\StoreUserTailorRequest;
+use App\Models\ManagementAccess\UserTailorDetail;
+use Illuminate\Validation\Rules\Password as RulesPassword;
 
 class UserTailorController extends Controller
 {
-  public function register(Request $request)
+  public function login(Request $request)
   {
-
     try {
-      $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email:rfc,dns|max:255|unique:user_tailors',
-        'password' => ['required', 'string', Password::min(8)->numbers()],
-        'first_name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
-        'address' => 'nullable|string|max:255',
-        'phone_number' => 'nullable|string|max:255|min:10',
-        'profile_picture' => ['image', 'max:2048'],
-        'speciality' => 'nullable|string|max:255'
+      if (auth('sanctum')->check()) {
+        return ResponseFormatter::success(
+          'You are already logged in.',
+          [
+            'access_token' => auth('sanctum')->user()->token,
+            'token_type' => 'Bearer',
+            'user' => auth('sanctum')->user(),
+          ]
+        );
+      } else {
+        $validator = \Validator::make($request->all(), [
+          'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_tailors,email'],
+          'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
+        ]);
+
+        if ($validator->fails()) {
+          return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+        }
+
+        if (Auth::guard('userTailor')->attempt(['email' => $request->email, 'password' => $request->password])) {
+          $user = Auth::guard('userTailor')->user();
+          $token = $user->createToken('UserTailor')->plainTextToken;
+          return ResponseFormatter::success(
+            [
+              'access_token' => $token,
+              'token_type' => 'Bearer',
+              'user' => $user,
+            ],
+            'Login Successful'
+          );
+        }
+      }
+    } catch (\Exception $err) {
+      return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+    }
+  }
+  /**
+   * Display a listing of the resource.
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function index()
+  {
+    try {
+      return ResponseFormatter::success(UserTailor::with('profile')->get()->makeHidden(['created_at', 'updated_at']));
+    } catch (\Exception $e) {
+      return ResponseFormatter::error(500, $e->getMessage(), 500);
+    }
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @return \Illuminate\Http\Response
+   */
+  public function store(Request $request)
+  {
+    try {
+      $validator = \Validator::make($request->all(), [
+        'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:user_tailors'],
+        'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
+        'first_name' => ['required', 'string', 'max:255'],
+        'last_name' => ['required', 'string', 'max:255'],
+        'profile_picture' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        'address' => ['nullable', 'string', 'max:255'],
+        'phone_number' => ['nullable', 'string', 'max:15'],
+        'speciality' => ['nullable', 'string', 'max:255'],
       ]);
 
-      if ($validator->fails()) {
-        return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 500);
-      }
 
-      $userTailor = UserTailor::create([
-        'email' => $request->email,
-        'password' => Hash::make($request->password)
-      ])->id;
+      if ($validator->fails()) {
+        return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+      }
 
       $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/tailor/profile', 'public')) : null;
 
-      UserTailorDetail::create([
-        'user_tailor_id' => $userTailor,
-        'first_name' => $request->first_name,
-        'last_name' => $request->last_name,
-        'address' => $request->address,
-        'phone_number' => $request->phone_number,
-        'profile_picture' => $image,
-        'speciality' => $request->speciality
-      ]);
+      $validatedData = $validator->validated();
+      $validatedData['password'] = Hash::make($validatedData['password']);
+      $validatedData['profile_picture'] = $image;
+      $userTailor = UserTailor::create($validatedData)->id;
 
-      $userTailor = UserTailor::with('userTailorDetail')->find($userTailor);
+      $validatedData['user_tailor_id'] = $userTailor;
+      UserTailorDetail::create($validatedData);
+
+      $userTailor = UserTailor::with('profile')->find($userTailor)->makeHidden(['created_at', 'updated_at']);
 
       $tokenResult = $userTailor->createToken('authToken')->plainTextToken;
 
-      return ResponseFormatter::success(
-        [
-          'access_token' => $tokenResult,
-          'token_type' => 'Bearer',
-          'user' => $userTailor
-        ],
-        'User Registered Successfully'
-      );
-    } catch (Exception $err) {
-      return ResponseFormatter::error(
-        [
-          'message' => 'Something went wrong',
-          'error' => $err
-        ],
-        'Authentication Failed',
-        500
-      );
+
+      return ResponseFormatter::success([
+        'access_token' => $tokenResult,
+        'token_type' => 'Bearer',
+        'user' => $userTailor
+      ], 'User Tailor Created Successfully');
+    } catch (\Exception $e) {
+      return ResponseFormatter::error(500, $e->getMessage(), 500);
     }
   }
 
-  public function login(Request $request)
+  /**
+   * Display the specified resource.
+   *
+   * @param  \App\Models\UserTailor  $userTailor
+   * @return \Illuminate\Http\Response
+   */
+  public function show(UserTailor $userTailor)
   {
-
-    try {
-      $validator = Validator::make(['email' => $request->email, 'password' => $request->password], [
-        'email' => 'email:rfc,dns|required',
-        'password' => 'required'
-      ]);
-
-      if ($validator->fails()) {
-        return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 500);
-      }
-
-
-      $credetials = request(['email', 'password']);
-      if (!Auth::guard('userTailors')->attempt($credetials)) {
-        return ResponseFormatter::error([
-          'message' => 'Unauthorized'
-        ], 'Authentication Failed', 500);
-      }
-
-      $user = UserTailor::with('userTailorDetail')->find(Auth::guard('userTailors')->user()->id);
-
-      $tokenResult = $user->createToken('authToken')->plainTextToken;
-
-      return ResponseFormatter::success(
-        [
-          'access_token' => $tokenResult,
-          'token_type' => 'Bearer',
-          'user' => $user
-        ],
-        'Authenticated'
-      );
-
-      if (!Hash::check($request->password, $user->password)) {
-        throw new \Exception("Invalid Credentials");
-      }
-    } catch (Exception $err) {
-      return ResponseFormatter::error(
-        [
-          'message' => 'Something went wrong',
-          'error' => $err
-        ],
-        'Authentication Failed',
-        500
-      );
-    }
+    //
   }
 
-  public function logout(Request $request)
+  /**
+   * Update the specified resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  \App\Models\UserTailor  $userTailor
+   * @return \Illuminate\Http\Response
+   */
+  public function update(Request $request, UserTailor $userTailor)
   {
-    try {
-      $token = $request->user()->currentAccessToken()->delete();
-
-      return ResponseFormatter::success(
-        $token,
-        'Logout Successfully'
-      );
-    } catch (Exception $err) {
-      return ResponseFormatter::error(
-        [
-          'message' => 'Something went wrong',
-          'error' => $err
-        ],
-        'Logout Failed',
-        500
-      );
-    }
+    //
   }
 
-  public function fetch(Request $request)
+  /**
+   * Remove the specified resource from storage.
+   *
+   * @param  \App\Models\UserTailor  $userTailor
+   * @return \Illuminate\Http\Response
+   */
+  public function destroy(UserTailor $userTailor)
   {
-    return ResponseFormatter::success(
-      Auth()->user(),
-      'User Fetched Successfully'
-    );
+    //
   }
 }

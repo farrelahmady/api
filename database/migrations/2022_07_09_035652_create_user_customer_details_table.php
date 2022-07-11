@@ -15,12 +15,12 @@ return new class extends Migration
   {
     Schema::create('user_customer_details', function (Blueprint $table) {
       $table->id();
-      $table->foreignId('user_customer_id')->references('id')->on('user_customers');
+      $table->foreignId('user_customer_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
       $table->string('first_name');
       $table->string('last_name');
-      $table->string('profile_picture')->nullable()->default('/customer/profile/default.png');
-      $table->string('address')->nullable();
-      $table->string('phone_number', 15)->nullable();
+      $table->text('profile_picture')->nullable();
+      $table->text('address')->nullable();
+      $table->string('phone_number')->nullable();
       $table->timestamps();
       $table->softDeletes();
     });
@@ -33,9 +33,9 @@ return new class extends Migration
    */
   public function down()
   {
+    Schema::dropIfExists('user_customer_details');
     Schema::table('user_customer_details', function (Blueprint $table) {
       $table->dropForeign(['user_customer_id']);
-      $table->drop();
     });
   }
 };

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PasswordController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserTailorController;
@@ -16,13 +17,35 @@ use App\Http\Controllers\UserCustomerController;
 |
 */
 
-Route::prefix('customer')->group(function () {
-  Route::post('register', [UserCustomerController::class, 'register']);
-  Route::post('login', [UserCustomerController::class, 'login']);
-  Route::post('logout', [UserCustomerController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/tailor/forgot-password', [PasswordController::class, 'forgotPassword'])->name('password.forgot');
+Route::post('/tailor/reset-password', [PasswordController::class, 'resetPassword'])->name('password.reset');
+
+Route::controller(UserTailorController::class)->group(function () {
+  Route::post('/tailor', 'store')->name('tailor.register');
+  Route::post('/tailor/login', 'login')->name('tailor.login');
+
+  Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/tailor/logout', 'logout')->name('tailor.logout');
+    Route::get('/tailor', 'index');
+    Route::get('/tailor/{id}', 'show');
+    Route::put('/tailor/{id}', 'update');
+    Route::delete('/tailor/{id}', 'destroy');
+  });
 });
-Route::prefix('tailor')->group(function () {
-  Route::post('register', [UserTailorController::class, 'register']);
-  Route::post('login', [UserTailorController::class, 'login']);
-  Route::post('logout', [UserTailorController::class, 'logout'])->middleware('auth:sanctum');
+
+Route::controller(UserCustomerController::class)->group(function () {
+  Route::post('/customer', 'store')->name('customer.register');
+  Route::post('/customer/login', 'login')->name('customer.login');
+
+  Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/customer/logout', 'logout')->name('customer.logout');
+    Route::get('/customer', 'index');
+    Route::get('/customer/{id}', 'show');
+    Route::put('/customer/{id}', 'update');
+    Route::delete('/customer/{id}', 'destroy');
+  });
+});
+Route::middleware('auth:sanctum')->group(function () {
+  // Route::apiResource('/tailor', UserTailorController::class);
+  Route::apiResource('/customer', UserCustomerController::class);
 });

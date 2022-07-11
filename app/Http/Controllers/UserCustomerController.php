@@ -2,151 +2,146 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use GuzzleHttp\Middleware;
-use App\Models\UserCustomer;
 use Illuminate\Http\Request;
+use App\Models\User\UserCustomer;
 use App\Helpers\ResponseFormatter;
-use App\Models\UserCustomerDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use App\Models\ManagementAccess\UserCustomerDetail;
+use Illuminate\Validation\Rules\Password as RulesPassword;
+
 
 class UserCustomerController extends Controller
 {
-  public function register(Request $request)
+  public function login(Request $request)
   {
-
     try {
-      $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email:rfc,dns|max:255|unique:user_customers',
-        'password' => ['required', 'string', Password::min(8)->numbers()],
-        'first_name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
-        'address' => 'nullable|string|max:255',
-        'phone_number' => 'nullable|string|max:255|min:10',
-        'profile_picture' => ['image', 'max:2048'],
+      if (auth('sanctum')->check()) {
+        return ResponseFormatter::success(
+          'You are already logged in.',
+          [
+            'access_token' => auth('sanctum')->user()->token,
+            'token_type' => 'Bearer',
+            'user' => auth('sanctum')->user(),
+          ]
+        );
+      } else {
+
+        $validator = \Validator::make($request->all(), [
+          'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_customers,email'],
+          'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
+        ]);
+
+        if ($validator->fails()) {
+          return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+        }
+
+        if (Auth::guard('userCustomer')->attempt(['email' => $request->email, 'password' => $request->password])) {
+          $user = Auth::guard('userCustomer')->user();
+          $token = $user->createToken('userCustomer')->plainTextToken;
+          return ResponseFormatter::success(
+            [
+              'access_token' => $token,
+              'token_type' => 'Bearer',
+              'user' => $user,
+            ],
+            'Login Successful'
+          );
+        }
+      }
+    } catch (\Exception $err) {
+      return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+    }
+  }
+  /**
+   * Display a listing of the resource.
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function index()
+  {
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @return \Illuminate\Http\Response
+   */
+  public function store(Request $request)
+  {
+    try {
+      $validator = \Validator::make($request->all(), [
+        'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:user_customers'],
+        'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
+        'first_name' => ['required', 'string', 'max:255'],
+        'last_name' => ['required', 'string', 'max:255'],
+        'profile_picture' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        'address' => ['nullable', 'string', 'max:255'],
+        'phone_number' => ['nullable', 'string', 'max:15'],
       ]);
+
 
       if ($validator->fails()) {
-        return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 500);
+        return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
       }
+
       $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/customer/profile', 'public')) : null;
 
-      $userCustomer = UserCustomer::create([
-        'email' => $request->email,
-        'password' => Hash::make($request->password)
-      ])->id;
-      UserCustomerDetail::create([
-        'user_customer_id' => $userCustomer,
-        'first_name' => $request->first_name,
-        'last_name' => $request->last_name,
-        'address' => $request->address,
-        'phone_number' => $request->phone_number,
-        'profile_picture' => $image
-      ]);
+      $validatedData = $validator->validated();
+      $validatedData['password'] = Hash::make($validatedData['password']);
+      $validatedData['profile_picture'] = $image;
+      $userCustomer = UserCustomer::create($validatedData)->id;
 
-      $userCustomer = UserCustomer::with('userCustomerDetail')->find($userCustomer);
+      $validatedData['user_customer_id'] = $userCustomer;
+      UserCustomerDetail::create($validatedData);
+
+      $userCustomer = UserCustomer::with('profile')->find($userCustomer)->makeHidden(['created_at', 'updated_at']);
 
       $tokenResult = $userCustomer->createToken('authToken')->plainTextToken;
 
-      return ResponseFormatter::success(
-        [
-          'access_token' => $tokenResult,
-          'token_type' => 'Bearer',
-          'user' => $userCustomer
-        ],
-        'User Registered Successfully'
-      );
-    } catch (Exception $err) {
-      return ResponseFormatter::error(
-        [
-          'message' => 'Something went wrong',
-          'error' => $err
-        ],
-        'Authentication Failed',
-        500
-      );
+
+      return ResponseFormatter::success([
+        'access_token' => $tokenResult,
+        'token_type' => 'Bearer',
+        'user' => $userCustomer
+      ], 'User Customer Created Successfully');
+    } catch (\Exception $e) {
+      return ResponseFormatter::error(500, $e->getMessage(), 500);
     }
   }
 
-  public function login(Request $request)
+  /**
+   * Display the specified resource.
+   *
+   * @param  \App\Models\UserCustomer  $userCustomer
+   * @return \Illuminate\Http\Response
+   */
+  public function show(UserCustomer $userCustomer)
   {
-
-    try {
-      $validator = Validator::make(['email' => $request->email, 'password' => $request->password], [
-        'email' => 'email:rfc,dns|required',
-        'password' => 'required'
-      ]);
-
-      if ($validator->fails()) {
-        return ResponseFormatter::error(['error' => $validator->errors()], 'Authentication Failed', 401);
-      }
-
-
-      $credetials = request(['email', 'password']);
-      if (!Auth::guard('userCustomers')->attempt($credetials)) {
-        return ResponseFormatter::error([
-          'message' => 'Unauthorized'
-        ], 'Authentication Failed', 401);
-      }
-
-      $user = UserCustomer::with('userCustomerDetail')->find(Auth::guard('userCustomers')->user()->id);
-
-      $tokenResult = $user->createToken('authToken')->plainTextToken;
-
-      return ResponseFormatter::success(
-        [
-          'access_token' => $tokenResult,
-          'token_type' => 'Bearer',
-          'user' => $user
-        ],
-        'Authenticated'
-      );
-
-      if (!Hash::check($request->password, $user->password)) {
-        throw new \Exception("Invalid Credentials");
-      }
-    } catch (Exception $err) {
-      return ResponseFormatter::error(
-        [
-          'message' => 'Something went wrong',
-          'error' => $err
-        ],
-        'Authentication Failed',
-        500
-      );
-    }
+    //
   }
 
-  public function logout(Request $request)
+  /**
+   * Update the specified resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  \App\Models\UserCustomer  $userCustomer
+   * @return \Illuminate\Http\Response
+   */
+  public function update(Request $request, UserCustomer $userCustomer)
   {
-    try {
-      $token = $request->user()->currentAccessToken()->delete();
-
-      return ResponseFormatter::success(
-        $token,
-        'Logout Successfully'
-      );
-    } catch (Exception $err) {
-      return ResponseFormatter::error(
-        [
-          'message' => 'Something went wrong',
-          'error' => $err
-        ],
-        'Logout Failed',
-        500
-      );
-    }
+    //
   }
 
-  public function fetch(Request $request)
+  /**
+   * Remove the specified resource from storage.
+   *
+   * @param  \App\Models\UserCustomer  $userCustomer
+   * @return \Illuminate\Http\Response
+   */
+  public function destroy(UserCustomer $userCustomer)
   {
-    return ResponseFormatter::success(
-      Auth()->user(),
-      'User Fetched Successfully'
-    );
+    //
   }
 }

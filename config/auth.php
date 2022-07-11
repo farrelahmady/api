@@ -15,6 +15,7 @@ return [
 
   'defaults' => [
     'guard' => 'web',
+    'passwords' => 'users',
   ],
 
   /*
@@ -39,15 +40,14 @@ return [
       'driver' => 'session',
       'provider' => 'users',
     ],
-    'userCustomers' => [
+    'userCustomer' => [
       'driver' => 'session',
       'provider' => 'userCustomers',
     ],
-    'userTailors' => [
+    'userTailor' => [
       'driver' => 'session',
       'provider' => 'userTailors',
     ],
-
   ],
 
   /*
@@ -74,13 +74,17 @@ return [
     ],
     'userCustomers' => [
       'driver' => 'eloquent',
-      'model' => App\Models\UserCustomer::class,
+      'model' => App\Models\User\UserCustomer::class,
     ],
     'userTailors' => [
       'driver' => 'eloquent',
-      'model' => App\Models\UserTailor::class,
+      'model' => App\Models\User\UserTailor::class,
     ],
 
+    // 'users' => [
+    //     'driver' => 'database',
+    //     'table' => 'users',
+    // ],
   ],
 
   /*
