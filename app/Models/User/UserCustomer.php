@@ -13,6 +13,7 @@ class UserCustomer extends Authenticatable
 {
   use HasFactory, SoftDeletes, HasApiTokens;
 
+  protected $guard = 'userCustomer';
   protected $guarded = ['id'];
 
   protected $hidden = [
@@ -21,8 +22,8 @@ class UserCustomer extends Authenticatable
     'deleted_at',
   ];
 
-  public function userCustomerDetail()
+  public function profile()
   {
-    return $this->hasOne(UserCustomerDetail::class);
+    return $this->hasOne(UserCustomerDetail::class, 'user_customer_id', 'id');
   }
 }

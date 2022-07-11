@@ -37,7 +37,8 @@ class UserTailorController extends Controller
         }
 
         if (Auth::guard('userTailor')->attempt(['email' => $request->email, 'password' => $request->password])) {
-          $user = Auth::guard('userTailor')->user();
+          $user = Auth::guard('userTailor')->user()->id;
+          $user = UserTailor::with('profile')->find($user)->makeHidden(['created_at', 'updated_at']);
           $token = $user->createToken('UserTailor')->plainTextToken;
           return ResponseFormatter::success(
             [

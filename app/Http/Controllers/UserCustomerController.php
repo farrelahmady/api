@@ -37,7 +37,8 @@ class UserCustomerController extends Controller
         }
 
         if (Auth::guard('userCustomer')->attempt(['email' => $request->email, 'password' => $request->password])) {
-          $user = Auth::guard('userCustomer')->user();
+          $user = Auth::guard('userCustomer')->user()->id;
+          $user = UserCustomer::with('profile')->find($user)->makeHidden(['created_at', 'updated_at']);
           $token = $user->createToken('userCustomer')->plainTextToken;
           return ResponseFormatter::success(
             [
@@ -48,6 +49,20 @@ class UserCustomerController extends Controller
             'Login Successful'
           );
         }
+      }
+    } catch (\Exception $err) {
+      return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+    }
+  }
+
+  public function logout()
+  {
+    try {
+      if (auth('sanctum')->check()) {
+        auth('sanctum')->user()->currentAccessToken()->delete();
+        return ResponseFormatter::success('Logout Successful');
+      } else {
+        return ResponseFormatter::error('You are not logged in.', 'Logout Failed', 401);
       }
     } catch (\Exception $err) {
       return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());

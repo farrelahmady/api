@@ -39,13 +39,10 @@ Route::controller(UserCustomerController::class)->group(function () {
 
   Route::middleware('auth:sanctum')->group(function () {
     Route::post('/customer/logout', 'logout')->name('customer.logout');
+    Route::post('/customer/logout', 'logout')->name('customer.logout');
     Route::get('/customer', 'index');
     Route::get('/customer/{id}', 'show');
     Route::put('/customer/{id}', 'update');
     Route::delete('/customer/{id}', 'destroy');
   });
-});
-Route::middleware('auth:sanctum')->group(function () {
-  // Route::apiResource('/tailor', UserTailorController::class);
-  Route::apiResource('/customer', UserCustomerController::class);
 });

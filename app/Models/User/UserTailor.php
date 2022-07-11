@@ -36,9 +36,9 @@ class UserTailor extends Authenticatable
     return $this->hasOne(UserTailorDetail::class, 'user_tailor_id', 'id');
   }
 
-  public function sendPasswordResetNotification($token)
-  {
-    $url = route('password.reset') . '?token=' . $token;
-    $this->notify(new ResetPasswordNotification($url));
-  }
+  // public function sendPasswordResetNotification($token)
+  // {
+  //   $url = route('password.reset') . '?token=' . $token;
+  //   $this->notify(new ResetPasswordNotification($url));
+  // }
 }
