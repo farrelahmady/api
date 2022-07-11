@@ -17,8 +17,8 @@ use App\Http\Controllers\UserCustomerController;
 |
 */
 
-Route::post('/tailor/forgot-password', [PasswordController::class, 'forgotPassword'])->name('password.forgot');
-Route::post('/tailor/reset-password', [PasswordController::class, 'resetPassword'])->name('password.reset');
+Route::post('/{user_type}/password/forgot', [PasswordController::class, 'forgotPassword'])->name('password.forgot');
+Route::post('/{user_type}/reset-password', [PasswordController::class, 'resetPassword'])->name('password.reset');
 
 Route::controller(UserTailorController::class)->group(function () {
   Route::post('/tailor', 'store')->name('tailor.register');
