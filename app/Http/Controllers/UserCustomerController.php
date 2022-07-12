@@ -7,6 +7,7 @@ use App\Models\User\UserCustomer;
 use App\Helpers\ResponseFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\UserCustomerDetail;
 use Illuminate\Validation\Rules\Password as RulesPassword;
 
@@ -27,7 +28,7 @@ class UserCustomerController extends Controller
         );
       } else {
 
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
           'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_customers,email'],
           'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
         ]);
@@ -48,6 +49,8 @@ class UserCustomerController extends Controller
             ],
             'Login Successful'
           );
+        } else {
+          return ResponseFormatter::error([], 'Invalid Credentials', 401);
         }
       }
     } catch (\Exception $err) {
@@ -86,7 +89,7 @@ class UserCustomerController extends Controller
   public function store(Request $request)
   {
     try {
-      $validator = \Validator::make($request->all(), [
+      $validator = Validator::make($request->all(), [
         'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:user_customers'],
         'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
         'first_name' => ['required', 'string', 'max:255'],
@@ -122,7 +125,7 @@ class UserCustomerController extends Controller
         'user' => $userCustomer
       ], 'User Customer Created Successfully');
     } catch (\Exception $e) {
-      return ResponseFormatter::error(500, $e->getMessage(), 500);
+      return ResponseFormatter::error($e->getMessage(), $e->getMessage(), 500);
     }
   }
 
