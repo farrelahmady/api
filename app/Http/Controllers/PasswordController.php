@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User\UserTailor;
-use App\Helpers\ResponseFormatter;
 use App\Models\User\UserCustomer;
+use App\Helpers\ResponseFormatter;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password as RulesPassword;
 
 class PasswordController extends Controller
 {
@@ -19,7 +22,7 @@ class PasswordController extends Controller
         throw new \Exception('Action Link is required', 406);
       }
 
-      $validator = \Validator::make($req->all(), [
+      $validator = Validator::make($req->all(), [
         'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_'  . $user_type . 's,email'],
       ]);
 
@@ -28,7 +31,7 @@ class PasswordController extends Controller
       }
 
       $email = $validator->validated()['email'];
-      $token = \Str::random(64);
+      $token = Str::random(64);
 
       $user = $user_type == 'tailor' ? UserTailor::with('profile') : UserCustomer::with('profile');
       $user = $user->where('email', $email)->first();
@@ -38,12 +41,12 @@ class PasswordController extends Controller
         return ResponseFormatter::error([], 'User not found', 404);
       }
 
-      $action_link = $req->action_link . '?token=' . $token;
+      $action_link = $req->action_link . '?email=' . $email . '&token=' . $token;
       Mail::send('email.resetPasswordMail', ['action_link' => $action_link, 'user' => $user], function ($message) use ($user) {
         $message->to($user->email, $user->profile->first_name . " " . $user->profile->last_name)->subject('Reset Password');
       });
 
-      \DB::table('password_resets')->insert([
+      DB::table('password_resets')->insert([
         'email' => $email,
         'token' => $token,
         'created_at' => \Carbon\Carbon::now(),
@@ -62,8 +65,47 @@ class PasswordController extends Controller
     }
   }
 
-  public function resetPassword(Request $request)
+  public function resetPassword(Request $request, $user_type)
   {
-    return $request->token;
+
+    try {
+      $validator = Validator::make($request->all(), [
+        'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_'  . $user_type . 's,email'],
+        'token' => ['required', 'string', 'exists:password_resets,token'],
+        'new_password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
+      ]);
+
+      if ($validator->fails()) {
+        return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+      }
+
+      $validData = $validator->validated();
+
+      $check_token = DB::table('password_resets')->where([
+        'email' => $validData['email'],
+        'token' => $validData['token'],
+      ])->first();
+
+      if (!$check_token) {
+        return ResponseFormatter::error([], 'Invalid token', 404);
+      }
+
+      $user = $user_type == 'tailor' ? new UserTailor() : new UserCustomer();
+
+      $user = $user->where('email', $validData['email'])->update([
+        'password' => Hash::make($validData['new_password']),
+      ]);
+
+
+
+      DB::table('password_resets')->where([
+        'email' => $validData['email'],
+        'token' => $validData['token'],
+      ])->delete();
+
+      return ResponseFormatter::success([], 'Password has been reset successfully');
+    } catch (\Exception $err) {
+      return ResponseFormatter::error($err->getMessage(), 'Something went wrong', 500);
+    }
   }
 }
