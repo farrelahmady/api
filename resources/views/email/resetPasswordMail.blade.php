@@ -7,19 +7,18 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    @vite('resources/css/app.css')
     <title>Email</title>
 </head>
 
 <body>
-    <section class="py-3 px-6 flex items-center flex-col gap-4 font-montserrat">
-        <h1 class="text-4xl text-[#2C96F1] font-bold ">Forgot Password</h1>
-        <img src="logo.png" alt="tailorine" class="w-20 rounded-lg">
-        <h2 class="text-xl font-semibold w-full">
+    <section style="font-family: 'Montserrat';display:flex;align-items:center;flex-direction:column;gap:1rem">
+        <h1 style="font-size: 2.25rem;line-height:2.5rem;color:#2C96F1;font-weight:700">Forgot Password</h1>
+        <h2 style="font-size: 1.25rem;line-height:1.75rem;font-weight:600;width:100%">
             Hello, {{ $user->profile->first_name }} {{ $user->profile->last_name }}
         </h2>
 
-        <p>We have received to reset the password for Tailorine Account Associated with {{ $user->email }}. You can
+        <p>We have received to reset the password for Tailorine Account Associated with {{ $user->email }}. You
+            can
             reset
             your
             password by clicking the link below</p>
@@ -27,7 +26,9 @@
         <form action="{{ $url }}" method="post">
             <input type="hidden" name="token">
             <input type="hidden" name="email">
-            <button type="submit" class="bg-[#2C96F1] rounded-lg text-white px-4 py-2 mt-4 font-medium">Reset yout
+            <button type="submit"
+                style="background-color: #2C96F1;border-radius: 0.5rem;color:white;padding: 1rem 0.5rem; font-weight:500">Reset
+                yout
                 Password</button>
         </form>
     </section>
