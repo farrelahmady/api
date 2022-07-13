@@ -38,7 +38,7 @@ class UserTailorController extends Controller
         if (Auth::guard('userTailor')->attempt(['email' => $request->email, 'password' => $request->password])) {
           $user = Auth::guard('userTailor')->user()->id;
           $user = UserTailor::with('profile')->find($user)->makeHidden(['created_at', 'updated_at']);
-          $token = $user->createToken('UserTailor')->plainTextToken;
+          $token = $user->createToken('authTailor')->plainTextToken;
           return ResponseFormatter::success(
             [
               'access_token' => $token,
@@ -50,6 +50,20 @@ class UserTailorController extends Controller
         } else {
           return ResponseFormatter::error([], 'Invalid Credentials', 401);
         }
+      }
+    } catch (\Exception $err) {
+      return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+    }
+  }
+
+  public function logout()
+  {
+    try {
+      if (auth('sanctum')->check()) {
+        $token = auth('sanctum')->user()->currentAccessToken()->delete();
+        return ResponseFormatter::success(['token' => $token], 'Logout Successful');
+      } else {
+        return ResponseFormatter::error('You are not logged in.', 'Logout Failed', 401);
       }
     } catch (\Exception $err) {
       return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
@@ -106,7 +120,7 @@ class UserTailorController extends Controller
 
       $userTailor = UserTailor::with('profile')->find($userTailor)->makeHidden(['created_at', 'updated_at']);
 
-      $tokenResult = $userTailor->createToken('authToken')->plainTextToken;
+      $tokenResult = $userTailor->createToken('authTailor')->plainTextToken;
 
 
       return ResponseFormatter::success([
