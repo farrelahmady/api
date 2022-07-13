@@ -18,10 +18,6 @@ class PasswordController extends Controller
   public function forgotPassword(Request $req, $user_type)
   {
     try {
-      if (!$req->has('action_link')) {
-        throw new \Exception('Action Link is required', 406);
-      }
-
       $validator = Validator::make($req->all(), [
         'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_'  . $user_type . 's,email'],
       ]);
@@ -41,8 +37,8 @@ class PasswordController extends Controller
         return ResponseFormatter::error([], 'User not found', 404);
       }
 
-      $action_link = $req->action_link . '?email=' . $email . '&token=' . $token;
-      Mail::send('email.resetPasswordMail', ['action_link' => $action_link, 'user' => $user], function ($message) use ($user) {
+      $url = 'http://tailorine.com/reset-password?email=' . $email . '&token=' . $token;
+      Mail::send('email.resetPasswordMail', ['url' => $url, 'user' => $user], function ($message) use ($user) {
         $message->to($user->email, $user->profile->first_name . " " . $user->profile->last_name)->subject('Reset Password');
       });
 
@@ -55,7 +51,6 @@ class PasswordController extends Controller
         [
           'email' => $email,
           'token' => $token,
-          'action_link' => $action_link,
         ],
         'Password reset link has been sent to your email.'
       );

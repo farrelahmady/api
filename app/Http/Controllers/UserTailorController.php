@@ -7,8 +7,7 @@ use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use App\Http\Requests\StoreUserTailorRequest;
+use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\UserTailorDetail;
 use Illuminate\Validation\Rules\Password as RulesPassword;
 
@@ -27,7 +26,7 @@ class UserTailorController extends Controller
           ]
         );
       } else {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
           'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_tailors,email'],
           'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
         ]);
@@ -48,6 +47,8 @@ class UserTailorController extends Controller
             ],
             'Login Successful'
           );
+        } else {
+          return ResponseFormatter::error([], 'Invalid Credentials', 401);
         }
       }
     } catch (\Exception $err) {
@@ -77,7 +78,7 @@ class UserTailorController extends Controller
   public function store(Request $request)
   {
     try {
-      $validator = \Validator::make($request->all(), [
+      $validator = Validator::make($request->all(), [
         'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:user_tailors'],
         'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
         'first_name' => ['required', 'string', 'max:255'],
