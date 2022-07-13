@@ -17,8 +17,7 @@ class UserCustomerSeeder extends Seeder
    */
   public function run()
   {
-    UserCustomerFactory::new()->count(10)->create();
-    UserCustomer::all()->each(function ($userCustomer) {
+    UserCustomerFactory::new()->count(10)->create()->each(function ($userCustomer) {
       UserCustomerDetail::factory()->create([
         'user_customer_id' => $userCustomer->id,
       ]);

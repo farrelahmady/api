@@ -20,6 +20,9 @@ class UserCustomerDetailFactory extends Factory
     return [
       'first_name' => $this->faker->firstName,
       'last_name' => $this->faker->lastName,
+      'profile_picture' => 'https://source.unsplash.com/240x240?people',
+      'address' => $this->faker->address,
+      'phone_number' => $this->faker->phoneNumber,
     ];
   }
 }

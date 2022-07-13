@@ -17,8 +17,12 @@ class UserTailorSeeder extends Seeder
    */
   public function run()
   {
-    UserTailorFactory::new()->count(10)->create();
-    UserTailor::all('id')->each(function ($userTailor) {
+    UserTailorFactory::new()->count(10)->create()->each(function ($userTailor) {
+      if ($userTailor->is_premium) {
+        $userTailor->update([
+          'max_schedule_slot' => 5,
+        ]);
+      }
       UserTailorDetail::factory()->create([
         'user_tailor_id' => $userTailor->id,
       ]);
