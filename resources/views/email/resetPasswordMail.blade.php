@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     @vite('resources/css/app.css')
-    <title>Document</title>
+    <title>Email</title>
 </head>
 
 <body>
