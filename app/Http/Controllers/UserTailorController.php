@@ -113,7 +113,7 @@ class UserTailorController extends Controller
       }
       if ($address) {
         $query->whereHas('profile', function ($q) use ($address) {
-          $q->where('address', 'like', '%' . $address . '%');
+          $q->where(DB::raw('lower(address)'), 'like', '%' . strtolower($address) . '%');
         });
       }
       if ($star) {
