@@ -3,13 +3,13 @@
 namespace App\Models\User;
 
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Notifications\ResetPasswordNotification;
-use App\Models\ManagementAccess\UserTailorDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
+use App\Models\ManagementAccess\UserTailorDetail;
+use App\Models\Operational\Review;
 
 class UserTailor extends Authenticatable
 {
@@ -25,15 +25,21 @@ class UserTailor extends Authenticatable
   ];
 
   protected $hidden = [
-    'id',
     'password',
     'is_admin',
+    'created_at',
+    'updated_at',
     'deleted_at',
   ];
 
   public function profile()
   {
     return $this->hasOne(UserTailorDetail::class, 'user_tailor_id', 'id');
+  }
+
+  public function review()
+  {
+    return $this->hasMany(Review::class, 'user_tailor_id', 'id');
   }
 
   // public function sendPasswordResetNotification($token)

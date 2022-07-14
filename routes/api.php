@@ -23,11 +23,11 @@ Route::post('/{user_type}/password/reset', [PasswordController::class, 'resetPas
 Route::controller(UserTailorController::class)->group(function () {
   Route::post('/tailor', 'store')->name('tailor.register');
   Route::post('/tailor/login', 'login')->name('tailor.login');
+  Route::get('/tailor', 'index');
+  Route::get('/tailor/{id}', 'show');
 
   Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tailor/logout', 'logout')->name('tailor.logout');
-    Route::get('/tailor', 'index');
-    Route::get('/tailor/{id}', 'show');
     Route::put('/tailor/{id}', 'update');
     Route::delete('/tailor/{id}', 'destroy');
   });

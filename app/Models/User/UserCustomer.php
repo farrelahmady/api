@@ -17,7 +17,6 @@ class UserCustomer extends Authenticatable
   protected $guarded = ['id'];
 
   protected $hidden = [
-    'id',
     'password',
     'deleted_at',
   ];

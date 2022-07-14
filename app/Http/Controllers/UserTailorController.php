@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
+use App\Models\Operational\Review;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -74,12 +76,62 @@ class UserTailorController extends Controller
    *
    * @return \Illuminate\Http\Response
    */
-  public function index()
+  public function index(Request $req)
   {
+
     try {
-      return ResponseFormatter::success(UserTailor::with('profile')->get()->makeHidden(['created_at', 'updated_at']));
+      $paginate = $req->paginate;
+      $limit = $req->limit;
+      $premium = $req->input('premium');
+      $speciality = $req->input('speciality');
+      $name = $req->input('name');
+      $address = $req->input('address');
+      $star = $req->input('rating');
+      $recommended = $req->has('recommended');
+
+
+      $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
+        ->groupBy('user_tailor_id');
+
+      $query = UserTailor::with('profile')->joinSub($rating, 'rating', function ($join) {
+        $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
+      })->orderByDesc('is_premium')->orderByDesc('rating');
+
+      if ($req->has('premium')) {
+        $premium = $premium == null || $premium >= 1 ? 1 : $premium;
+        $query = $query->where('is_premium', +$premium);
+      }
+      if ($speciality) {
+        $query->whereHas('profile', function ($q) use ($speciality) {
+          $q->where('speciality', $speciality);
+        });
+      }
+      if ($name) {
+        $query->whereHas('profile', function ($q) use ($name) {
+          $q->where('first_name', 'like', '%' . $name . '%')->orWhere('last_name', 'like', '%' . $name . '%');
+        });
+      }
+      if ($address) {
+        $query->whereHas('profile', function ($q) use ($address) {
+          $q->where('address', 'like', '%' . $address . '%');
+        });
+      }
+      if ($star) {
+        $query->where('rating', '>=', $star);
+      }
+      if ($limit) {
+        $query = $query->take($limit);
+      }
+
+      $query = $paginate ? $query->paginate($paginate) : $query->get()->makeHidden(['created_at', 'updated_at']);
+
+      if ($query->count() <= 0) {
+        return ResponseFormatter::error(null, 'No Tailor found', 404);
+      }
+
+      return ResponseFormatter::success($query, 'Tailors retrieved successfully');
     } catch (\Exception $e) {
-      return ResponseFormatter::error(500, $e->getMessage(), 500);
+      return ResponseFormatter::error($e->getMessage(), 'Something Went Wrong', 500);
     }
   }
 
