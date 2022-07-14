@@ -103,12 +103,12 @@ class UserTailorController extends Controller
       }
       if ($speciality) {
         $query->whereHas('profile', function ($q) use ($speciality) {
-          $q->where('speciality', $speciality);
+          $q->where(DB::raw('lower(speciality)'), $speciality);
         });
       }
       if ($name) {
         $query->whereHas('profile', function ($q) use ($name) {
-          $q->where('first_name', 'like', '%' . $name . '%')->orWhere('last_name', 'like', '%' . $name . '%');
+          $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($name) . '%')->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($name) . '%');
         });
       }
       if ($address) {
