@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\ManagementAccess\UserTailorDetail;
 use App\Models\User\UserTailor;
-use Database\Factories\User\UserTailorFactory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Database\Factories\User\UserTailorFactory;
+use App\Models\ManagementAccess\UserTailorDetail;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class UserTailorSeeder extends Seeder
 {
@@ -17,7 +18,17 @@ class UserTailorSeeder extends Seeder
    */
   public function run()
   {
-    UserTailorFactory::new()->count(10)->create()->each(function ($userTailor) {
+    UserTailor::create([
+      'email' => 'tailor@gmail.com',
+      'password' => Hash::make("tailor123"),
+    ])->profile()->create([
+      'first_name' => 'Tailorine',
+      'last_name' => 'Tailor',
+      'phone_number' => '+639123456789',
+      'address' => 'Jalan TB Simatupang, kel. Simatupang, Kec. Simatupang, Kota Tangerang, Banten 15158',
+      'profile_picture' => 'https://source.unsplash.com/240x240?people',
+    ]);
+    UserTailorFactory::new()->count(20)->create()->each(function ($userTailor) {
       if ($userTailor->is_premium) {
         $userTailor->update([
           'max_schedule_slot' => 5,
