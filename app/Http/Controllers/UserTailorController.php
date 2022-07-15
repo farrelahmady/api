@@ -99,7 +99,7 @@ class UserTailorController extends Controller
         $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
       })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id');
       if ($recommended) {
-        $query = $query->orderByDesc('is_premium')->orderByDesc('rating');
+        $query = $query->where('is_premium', 1)->orderByDesc('rating');
       }
 
       if ($req->has('premium')) {
