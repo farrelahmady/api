@@ -9,6 +9,7 @@ use App\Models\Operational\Review;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\UserTailorDetail;
 use Illuminate\Validation\Rules\Password as RulesPassword;
@@ -88,14 +89,18 @@ class UserTailorController extends Controller
       $address = $req->input('address');
       $star = $req->input('rating');
       $recommended = $req->has('recommended');
-
+      $sort = $req->input('sort');
+      $order = $req->input('order', 'asc');
 
       $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
         ->groupBy('user_tailor_id');
 
-      $query = UserTailor::with('profile')->joinSub($rating, 'rating', function ($join) {
+      $query = UserTailor::joinSub($rating, 'rating', function ($join) {
         $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-      })->orderByDesc('is_premium')->orderByDesc('rating');
+      })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id');
+      if ($recommended) {
+        $query = $query->orderByDesc('is_premium')->orderByDesc('rating');
+      }
 
       if ($req->has('premium')) {
         $premium = $premium == null || $premium >= 1 ? 1 : $premium;
@@ -122,8 +127,17 @@ class UserTailorController extends Controller
       if ($limit) {
         $query = $query->take($limit);
       }
-
+      if ($sort) {
+        // return $order;
+        $sort = explode(',', $sort);
+        foreach ($sort as $s) {
+          if (in_array($s, Schema::getColumnListing('user_tailor_details')) || in_array($s, Schema::getColumnListing('user_tailors')) || $s == 'rating') {
+            $query = $query->orderBy($s, $order);
+          }
+        }
+      }
       $query = $paginate ? $query->paginate($paginate) : $query->get()->makeHidden(['created_at', 'updated_at']);
+
 
       if ($query->count() <= 0) {
         return ResponseFormatter::error(null, 'No Tailor found', 404);

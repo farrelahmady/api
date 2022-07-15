@@ -19,6 +19,8 @@ class UserTailor extends Authenticatable
 
   protected $guarded = ['id'];
 
+  // protected $with = ['profile'];
+
   protected $casts = [
     'is_premium' => 'boolean',
     'is_admin' => 'boolean',
