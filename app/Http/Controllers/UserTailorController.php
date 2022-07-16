@@ -97,7 +97,8 @@ class UserTailorController extends Controller
 
             $query = UserTailor::joinSub($rating, 'rating', function ($join) {
                 $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id');
+            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('is_ready', 1);
+
             if ($recommended) {
                 $query = $query->where('is_premium', 1)->orderByDesc('rating');
             }
@@ -166,14 +167,14 @@ class UserTailorController extends Controller
                 'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
-                'profile_picture' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
                 'address' => ['nullable', 'string', 'max:255'],
                 'district' => ['required', 'string', 'max:255'],
                 'city' => ['required', 'string', 'max:255'],
                 'province' => ['required', 'string', 'max:255'],
                 'zip_code' => ['required', 'string', 'max:255'],
-                'phone_number' => ['nullable', 'string', 'max:15'],
-                'speciality' => ['nullable', 'string', 'max:255'],
+                // 'profile_picture' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+                // 'phone_number' => ['nullable', 'string', 'max:15'],
+                // 'speciality' => ['nullable', 'string', 'max:255'],
             ]);
 
 
@@ -181,11 +182,11 @@ class UserTailorController extends Controller
                 return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
             }
 
-            $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/tailor/profile', 'public')) : null;
+            // $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/tailor/profile', 'public')) : null;
 
             $validatedData = $validator->validated();
             $validatedData['password'] = Hash::make($validatedData['password']);
-            $validatedData['profile_picture'] = $image;
+            // $validatedData['profile_picture'] = $image;
             $userTailor = UserTailor::create($validatedData)->id;
 
             $validatedData['user_tailor_id'] = $userTailor;

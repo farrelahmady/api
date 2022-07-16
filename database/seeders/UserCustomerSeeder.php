@@ -25,7 +25,7 @@ class UserCustomerSeeder extends Seeder
             'first_name' => 'Tailorine',
             'last_name' => 'Customer',
             'phone_number' => '+639123456789',
-            'address' => 'Jalan TB Simatupang, kel. Simatupang, Kec. Simatupang, Kota Tangerang, Banten 15158',
+            'address' => 'Jalan TB Simatupang, kel. Simatupang',
             'district' => 'Simatupang',
             'city' => 'Tangerang',
             'province' => 'Banten',

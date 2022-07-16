@@ -6,35 +6,34 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-  /**
-   * Run the migrations.
-   *
-   * @return void
-   */
-  public function up()
-  {
-    Schema::create('user_tailors', function (Blueprint $table) {
-      $table->id();
-      $table->string('email')->unique();
-      $table->string('password');
-      $table->smallInteger('max_schedule_slot')->default(3);
-      $table->unsignedBigInteger('transaction_id')->nullable();
-      $table->boolean('is_premium')->default(false);
-      $table->boolean('is_ready')->default(false);
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('user_tailors', function (Blueprint $table) {
+            $table->id();
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->smallInteger('max_schedule_slot')->default(3);
+            $table->unsignedBigInteger('transaction_id')->nullable();
+            $table->boolean('is_premium')->default(false);
+            $table->boolean('is_ready')->default(false);
+            $table->boolean('is_admin')->default(false);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
 
-      $table->boolean('is_admin')->default(false);
-      $table->timestamps();
-      $table->softDeletes();
-    });
-  }
-
-  /**
-   * Reverse the migrations.
-   *
-   * @return void
-   */
-  public function down()
-  {
-    Schema::dropIfExists('user_tailors');
-  }
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('user_tailors');
+    }
 };
