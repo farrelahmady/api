@@ -20,6 +20,8 @@ return new class extends Migration
       $table->smallInteger('max_schedule_slot')->default(3);
       $table->unsignedBigInteger('transaction_id')->nullable();
       $table->boolean('is_premium')->default(false);
+      $table->boolean('is_ready')->default(false);
+
       $table->boolean('is_admin')->default(false);
       $table->timestamps();
       $table->softDeletes();

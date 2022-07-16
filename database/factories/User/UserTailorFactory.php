@@ -21,6 +21,7 @@ class UserTailorFactory extends Factory
       'email' => preg_replace('/@example\..*/', '@gmail.com', $this->faker->unique()->safeEmail),
       'password' => Hash::make("tailor123"), // password
       'is_premium' => $this->faker->boolean,
+      'is_ready' => $this->faker->boolean,
     ];
   }
 }

@@ -10,20 +10,26 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class UserTailorDetailFactory extends Factory
 {
-  /**
-   * Define the model's default state.
-   *
-   * @return array<string, mixed>
-   */
-  public function definition()
-  {
-    return [
-      'first_name' => $this->faker->firstName,
-      'last_name' => $this->faker->lastName,
-      'profile_picture' => 'https://source.unsplash.com/240x240?people',
-      'address' => $this->faker->address,
-      'phone_number' => $this->faker->phoneNumber,
-      'speciality' => $this->faker->randomElement(['Upper', 'Lower']),
-    ];
-  }
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition()
+    {
+        return [
+            'first_name' => $this->faker->firstName,
+            'last_name' => $this->faker->lastName,
+            'profile_picture' => 'https://source.unsplash.com/240x240?people',
+            'place_picture' => 'https://source.unsplash.com/720x480?tailor',
+            'description' => $this->faker->paragraph(10),
+            'address' => $this->faker->address,
+            'district' => $this->faker->citySuffix,
+            'city' => $this->faker->city,
+            'province' => $this->faker->state,
+            'zip_code' => $this->faker->postcode,
+            'phone_number' => $this->faker->phoneNumber,
+            'speciality' => $this->faker->randomElement(['Upper', 'Lower']),
+        ];
+    }
 }

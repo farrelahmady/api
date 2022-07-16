@@ -96,7 +96,11 @@ class UserCustomerController extends Controller
         'first_name' => ['required', 'string', 'max:255'],
         'last_name' => ['required', 'string', 'max:255'],
         'profile_picture' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-        'address' => ['nullable', 'string', 'max:255'],
+        'address' => ['required', 'string', 'max:255'],
+        'district' => ['required', 'string', 'max:255'],
+        'city' => ['required', 'string', 'max:255'],
+        'province' => ['required', 'string', 'max:255'],
+        'zip_code' => ['required', 'string', 'max:255'],
         'phone_number' => ['nullable', 'string', 'max:15'],
       ]);
 
