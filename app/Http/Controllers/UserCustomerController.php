@@ -110,10 +110,11 @@ class UserCustomerController extends Controller
             }
 
 
-            // $profilePicture = $request->hasFile('profile_picture') && $request->file('profile_picture')->isValid() ?  asset('storage/' . $request->file('profile_picture')->store('images/customer/profile', 'public')) : null;
+            $profilePicture = $request->hasFile('profile_picture') && $request->file('profile_picture')->isValid() ?  asset('storage/' . $request->file('profile_picture')->store('images/customer/profile', 'public')) : null;
 
             $validatedData = $validator->validated();
             $validatedData['password'] = Hash::make($validatedData['password']);
+            $validatedData['profile_picture'] = $profilePicture;
             $userCustomer = UserCustomer::create($validatedData)->id;
 
             $validatedData['user_customer_id'] = $userCustomer;

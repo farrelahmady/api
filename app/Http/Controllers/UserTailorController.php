@@ -182,11 +182,12 @@ class UserTailorController extends Controller
                 return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
             }
 
-          // $image = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/tailor/profile', 'public')) : null;
+            $profilePicture = $request->hasFile('profile_picture') ?  asset('storage/' . $request->file('profile_picture')->store('images/tailor/profile', 'public')) : null;
+            $placePicture = $request->hasFile('place_picture') ?  asset('storage/' . $request->file('place_picture')->store('images/tailor/place', 'public')) : null;
 
             $validatedData = $validator->validated();
             $validatedData['password'] = Hash::make($validatedData['password']);
-            // $validatedData['profile_picture'] = $image;
+            $validatedData['profile_picture'] = $profilePicture;
             $userTailor = UserTailor::create($validatedData)->id;
 
             $validatedData['user_tailor_id'] = $userTailor;
