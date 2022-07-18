@@ -85,7 +85,7 @@ class UserTailorController extends Controller
             $limit = $req->limit;
             $premium = $req->input('premium');
             $speciality = $req->input('speciality');
-            $name = $req->input('name');
+            $search = $req->input('search');
             $address = $req->input('address');
             $star = $req->input('rating');
             $recommended = $req->has('recommended');
@@ -112,9 +112,9 @@ class UserTailorController extends Controller
                     $q->where(DB::raw('lower(speciality)'), $speciality);
                 });
             }
-            if ($name) {
-                $query->whereHas('profile', function ($q) use ($name) {
-                    $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($name) . '%')->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($name) . '%');
+            if ($search) {
+                $query->whereHas('profile', function ($q) use ($search) {
+                    $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($search) . '%')->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($search) . '%');
                 });
             }
             if ($address) {
@@ -188,6 +188,7 @@ class UserTailorController extends Controller
             $validatedData = $validator->validated();
             $validatedData['password'] = Hash::make($validatedData['password']);
             $validatedData['profile_picture'] = $profilePicture;
+            $validatedData['place_picture'] = $placePicture;
             $userTailor = UserTailor::create($validatedData)->id;
 
             $validatedData['user_tailor_id'] = $userTailor;
@@ -214,9 +215,23 @@ class UserTailorController extends Controller
      * @param  \App\Models\UserTailor  $userTailor
      * @return \Illuminate\Http\Response
      */
-    public function show(UserTailor $userTailor)
+    public function show($uuid)
     {
-        //
+        try {
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
+                ->groupBy('user_tailor_id');
+
+            $userTailor = UserTailor::joinSub($rating, 'rating', function ($join) {
+                $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
+            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $uuid)->first();
+            // $userTailor = UserTailor::with('profile')->find($uuid);
+            if (!$userTailor) {
+                return ResponseFormatter::error(null, 'User Tailor not found', 404);
+            }
+            return ResponseFormatter::success($userTailor, 'User Tailor retrieved successfully');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'Something Went Wrong', 500);
+        }
     }
 
     /**

@@ -10,43 +10,51 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 use App\Models\ManagementAccess\UserTailorDetail;
 use App\Models\Operational\Review;
+use App\Models\Traits\HasUuid;
 
 class UserTailor extends Authenticatable
 {
-  use HasFactory, SoftDeletes, HasApiTokens, Notifiable;
+    use HasFactory, SoftDeletes, HasApiTokens, Notifiable, HasUuid;
 
-  protected $guard = 'userTailor';
+    protected $guard = 'userTailor';
 
-  protected $guarded = ['id'];
+    protected $guarded = ['id'];
 
-  // protected $with = ['profile'];
+    // protected $with = ['profile'];
 
-  protected $casts = [
-    'is_premium' => 'boolean',
-    'is_admin' => 'boolean',
-  ];
+    protected $casts = [
+        'is_premium' => 'boolean',
+        'is_admin' => 'boolean',
+    ];
 
-  protected $hidden = [
-    'password',
-    'is_admin',
-    'created_at',
-    'updated_at',
-    'deleted_at',
-  ];
+    protected $hidden = [
+        'id',
+        'password',
+        'is_admin',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
-  public function profile()
-  {
-    return $this->hasOne(UserTailorDetail::class, 'user_tailor_id', 'id');
-  }
+    public function profile()
+    {
+        return $this->hasOne(UserTailorDetail::class, 'user_tailor_id', 'id');
+    }
 
-  public function review()
-  {
-    return $this->hasMany(Review::class, 'user_tailor_id', 'id');
-  }
+    public function review()
+    {
+        return $this->hasMany(Review::class, 'user_tailor_id', 'id');
+    }
 
-  // public function sendPasswordResetNotification($token)
-  // {
-  //   $url = route('password.reset') . '?token=' . $token;
-  //   $this->notify(new ResetPasswordNotification($url));
-  // }
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+
+    // public function sendPasswordResetNotification($token)
+    // {
+    //   $url = route('password.reset') . '?token=' . $token;
+    //   $this->notify(new ResetPasswordNotification($url));
+    // }
 }

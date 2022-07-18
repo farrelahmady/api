@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('user_tailors', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('email')->unique();
             $table->string('password');
             $table->smallInteger('max_schedule_slot')->default(3);

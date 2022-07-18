@@ -2,19 +2,20 @@
 
 namespace Database\Seeders;
 
+use App\Models\Operational\Review;
 use Database\Factories\Operational\ReviewFactory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ReviewSeeder extends Seeder
 {
-  /**
-   * Run the database seeds.
-   *
-   * @return void
-   */
-  public function run()
-  {
-    ReviewFactory::new()->count(100)->create();
-  }
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        Review::factory()->count(100)->create();
+    }
 }
