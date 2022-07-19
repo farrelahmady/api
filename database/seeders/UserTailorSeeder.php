@@ -19,9 +19,11 @@ class UserTailorSeeder extends Seeder
      */
     public function run()
     {
-        $files = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/profile/avatar-') !== false)->values();
+        $profiles = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/profile/avatar-') !== false)->values();
+        $places = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/place/') !== false)->values();
 
-        echo $files->count() . " files found. ";
+        echo $profiles->count() . " files found. ";
+        echo $places->count() . " files found. ";
         echo "Seeding UserTailor...\n";
 
         UserTailor::create([
@@ -31,8 +33,8 @@ class UserTailorSeeder extends Seeder
             'first_name' => 'Tailorine',
             'last_name' => 'Tailor',
             'phone_number' => '+639123456789',
-            'profile_picture' => asset("storage/" . $files->shift()),
-            'place_picture' => 'https://source.unsplash.com/720x480?tailor',
+            'profile_picture' => asset("storage/" . $profiles->shift()),
+            'place_picture' => asset("storage/" . $places->random()),
             'description' => 'Pelopor tailor pertama dan terbaik di Pekalongan, Jawa Tengah. Menyediakan jasa tailor jas, kebaya, kemeja, seragam, baju pesta, tunik, dress dan lain-lain.',
             'address' => 'Jalan TB Simatupang, kel. Simatupang',
             'district' => 'Simatupang',
@@ -40,7 +42,7 @@ class UserTailorSeeder extends Seeder
             'province' => 'Banten',
             'zip_code' => '15158',
         ]);
-        UserTailorFactory::new()->count($files->count())->create()->each(function ($userTailor) use ($files) {
+        UserTailorFactory::new()->count($profiles->count())->create()->each(function ($userTailor) use ($profiles, $places) {
 
             if ($userTailor->is_premium) {
                 $userTailor->update([
@@ -48,7 +50,8 @@ class UserTailorSeeder extends Seeder
                 ]);
             }
             UserTailorDetail::factory()->create([
-                'profile_picture' => asset("storage/" . $files->shift()),
+                'profile_picture' => asset("storage/" . $profiles->shift()),
+                'place_picture' => asset("storage/" . $places->random()),
                 'user_tailor_id' => $userTailor->id,
             ]);
         });
