@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User\UserCustomer;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Database\Factories\User\UserCustomerFactory;
 use App\Models\ManagementAccess\UserCustomerDetail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -18,6 +19,11 @@ class UserCustomerSeeder extends Seeder
      */
     public function run()
     {
+        $files = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/customer/profile/avatar-') !== false)->values();
+
+        echo $files->count() . " files found. ";
+        echo "Seeding UserCustomer...\n";
+
         UserCustomer::create([
             'email' => 'customer@gmail.com',
             'password' => Hash::make("customer123"),
@@ -30,11 +36,12 @@ class UserCustomerSeeder extends Seeder
             'city' => 'Tangerang',
             'province' => 'Banten',
             'zip_code' => '15158',
-            'profile_picture' => 'https://source.unsplash.com/240x240?people',
+            'profile_picture' => asset("storage/" . $files->shift()),
 
         ]);
-        UserCustomerFactory::new()->count(20)->create()->each(function ($userCustomer) {
+        UserCustomerFactory::new()->count($files->count())->create()->each(function ($userCustomer) use ($files) {
             UserCustomerDetail::factory()->create([
+                'profile_picture' => asset("storage/" . $files->shift()),
                 'user_customer_id' => $userCustomer->id,
             ]);
         });
