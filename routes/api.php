@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\PasswordController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -44,4 +45,9 @@ Route::controller(UserCustomerController::class)->group(function () {
         Route::put('/customer/{id}', 'update');
         Route::delete('/customer/{id}', 'destroy');
     });
+});
+
+Route::controller(CatalogController::class)->group(function () {
+    Route::get('/catalog', 'index');
+    Route::get('/catalog/{uuid}', 'show');
 });
