@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('category', ['LOWER', 'UPPER']);
             $table->string('fabric');
+            $table->float('price');
             $table->longText('description');
             $table->timestamps();
             $table->softDeletes();

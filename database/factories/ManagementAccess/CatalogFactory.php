@@ -21,6 +21,7 @@ class CatalogFactory extends Factory
             "description" => $this->faker->text,
             "category" => $this->faker->randomElement(["LOWER", "UPPER"]),
             "fabric" => $this->faker->word,
+            "price" => $this->faker->randomFloat(0, 5, 30) / 2 * 10000,
         ];
     }
 }

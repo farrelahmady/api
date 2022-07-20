@@ -30,4 +30,17 @@ class CatalogController extends Controller
             return ResponseFormatter::error($e->getMessage(), "Something went wrong", 500);
         }
     }
+
+    public function show(Request $req, $uuid)
+    {
+        try {
+            $catalog = Catalog::with('item')->where('uuid', $uuid)->first();
+            if (!$catalog) {
+                return ResponseFormatter::error(null, 'Catalog not found', 404);
+            }
+            return ResponseFormatter::success($catalog, "Catalog retrieved successfully");
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Something went wrong", 500);
+        }
+    }
 }
