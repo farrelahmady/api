@@ -86,6 +86,7 @@ class UserTailorController extends Controller
             $premium = $req->input('premium');
             $speciality = $req->input('speciality');
             $search = $req->input('search');
+            $name = $req->input('name');
             $address = $req->input('address');
             $star = $req->input('rating');
             $recommended = $req->has('recommended');
@@ -114,14 +115,27 @@ class UserTailorController extends Controller
             }
             if ($search) {
                 $query->whereHas('profile', function ($q) use ($search) {
-                    $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($search) . '%')->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($search) . '%');
+                    $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($search) . '%')
+                        ->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($search) . '%')
+                        ->orWhere(DB::raw('lower(address)'), 'like', '%' . strtolower($search) . '%')
+                        ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($search) . '%')
+                        ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($search) . '%')
+                        ->orWhere(DB::raw('lower(city)'), 'like', '%' . strtolower($search) . '%');
                 });
             }
+
+            if ($name) {
+                $query->whereHas('profile', function ($q) use ($name) {
+                    $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($name) . '%')
+                        ->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($name) . '%');
+                });
+            }
+
             if ($address) {
                 $query->whereHas('profile', function ($q) use ($address) {
                     $q->where(DB::raw('lower(address)'), 'like', '%' . strtolower($address) . '%')
                         ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($address) . '%')
-                        ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($address) . '%')
+                        ->orWhere(DB::raw('lower(city)'), 'like', '%' . strtolower($address) . '%')
                         ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($address) . '%');
                 });
             }
