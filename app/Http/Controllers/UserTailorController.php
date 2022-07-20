@@ -93,12 +93,15 @@ class UserTailorController extends Controller
             $sort = $req->input('sort');
             $order = $req->input('order', 'asc');
 
-            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))
                 ->groupBy('user_tailor_id');
+
+            // $rating = DB::table('reviews')->selectRaw("COUNT(rating) as total, user_tailor_id, CAST(AVG(rating) AS DECIMAL(5,0)) as rating")->groupBy("user_tailor_id")->get();
+            // return ResponseFormatter::success($rating, "Rating retrieved successfully");
 
             $query = UserTailor::joinSub($rating, 'rating', function ($join) {
                 $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('is_ready', 1);
+            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', "rating.total_review", 'user_tailor_details.id as profile_id')->where('is_ready', 1);
 
             if ($recommended) {
                 $query = $query->where('is_premium', 1)->orderByDesc('rating');

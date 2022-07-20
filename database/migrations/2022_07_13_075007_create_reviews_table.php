@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_customer_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_tailor_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->tinyInteger('rating');
-            $table->text('comment');
+            $table->text('message');
             $table->timestamps();
             $table->softDeletes();
         });

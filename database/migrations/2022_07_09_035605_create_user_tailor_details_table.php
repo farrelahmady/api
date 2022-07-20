@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('province');
             $table->string('zip_code');
             $table->string('phone_number')->nullable();
-            $table->string('speciality')->nullable();
+            // $table->string('speciality')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

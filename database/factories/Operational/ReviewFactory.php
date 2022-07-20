@@ -11,18 +11,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ReviewFactory extends Factory
 {
-  /**
-   * Define the model's default state.
-   *
-   * @return array<string, mixed>
-   */
-  public function definition()
-  {
-    return [
-      'user_customer_id' => $this->faker->numberBetween(1, UserCustomer::count()),
-      'user_tailor_id' => $this->faker->numberBetween(1, UserTailor::count()),
-      'rating' => $this->faker->numberBetween(1, 5),
-      'comment' => $this->faker->text,
-    ];
-  }
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition()
+    {
+        return [
+            'user_customer_id' => $this->faker->numberBetween(1, UserCustomer::count()),
+            'user_tailor_id' => $this->faker->numberBetween(1, UserTailor::count()),
+            'rating' => $this->faker->numberBetween(1, 5),
+            'message' => $this->faker->text,
+        ];
+    }
 }
