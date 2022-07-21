@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\ResponseFormatter;
-use App\Models\ManagementAccess\Catalog;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseFormatter;
+use Illuminate\Support\Facades\DB;
+use App\Models\ManagementAccess\Catalog;
 
 class CatalogController extends Controller
 {
@@ -12,11 +13,28 @@ class CatalogController extends Controller
     {
         try {
             $tailor_uuid = $req->input('tailor');
+            $fabric = $req->input('fabric');
+            $category = $req->input('category');
+            $search = $req->input('search');
 
             $catalog = Catalog::with('item');
 
             if ($tailor_uuid) {
                 $catalog = $catalog->where('user_tailor_id', $tailor_uuid);
+            }
+
+            if ($fabric) {
+                $catalog = $catalog->where(DB::raw('lower(fabric)'), 'like', '%' . strtolower($fabric) . '%');
+            }
+
+            if ($category) {
+                $catalog = $catalog->where(DB::raw('lower(category)'), 'like', '%' . strtolower($category) . '%');
+            }
+
+            if ($search) {
+                $catalog = $catalog->where(DB::raw('lower(name)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(fabric)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(category)'), 'like', '%' . strtolower($search) . '%');
             }
 
             $catalog = $catalog->orderBy("name")->get();
