@@ -15,7 +15,7 @@ class Catalog extends Model
 
     protected $hidden = [
         'id',
-        'user_tailor_id',
+        // 'user_tailor_id',
         'created_at',
         'updated_at',
         'deleted_at',
