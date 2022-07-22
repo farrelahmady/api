@@ -17,7 +17,7 @@ class CatalogFactory extends Factory
     public function definition()
     {
         return [
-            "name" => $this->faker->word,
+            "name" => $this->faker->randomElement(["celana pendek", "batik", "jeans", "hoodie",]),
             "description" => $this->faker->text,
             "category" => $this->faker->randomElement(["LOWER", "UPPER"]),
             "fabric" => $this->faker->word,

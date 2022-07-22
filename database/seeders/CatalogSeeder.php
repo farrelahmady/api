@@ -20,17 +20,17 @@ class CatalogSeeder extends Seeder
     public function run()
     {
         $files = collect([
-            "lower" => [
-                "celanaPendek" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/celana-pendek') !== false)->values(),
+            "lower" => collect([
+                "celana-pendek" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/celana-pendek') !== false)->values(),
                 "jeans" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/jeans') !== false)->values(),
 
-            ],
-            "upper" => [
+            ]),
+            "upper" => collect([
                 "batik" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/batik') !== false)->values(),
                 "kaos" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/kaos') !== false)->values(),
                 "hoodie" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/hoodie') !== false)->values()
 
-            ]
+            ])
         ]);
 
         // $files['lower']['celanaPendek'] = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/celana-pendek') !== false)->values();
@@ -40,14 +40,26 @@ class CatalogSeeder extends Seeder
         // $files['upper']['kaos'] = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/kaos') !== false)->values();
 
         $keys = $files->keys();
-        // var_dump($keys);
-        UserTailor::all()->each(function ($tailor) {
+        var_dump($files[$keys->random()]->keys());
+        UserTailor::all()->each(function ($tailor) use ($files, $keys) {
             CatalogFactory::new()->count(rand(1, 5))->create([
                 'user_tailor_id' => $tailor->uuid,
-            ])->each(function ($catalog) {
+            ])->each(function ($catalog) use ($files) {
+
+                $catalog->name = str_replace("-", " ", $files[\Str::lower($catalog->category)]->keys()->random());
+                $catalog->save();
+                $file = $files[\Str::lower($catalog->category)][str_replace(" ", "-", $catalog->name)];
                 CatalogItem::factory()->count(5)->create([
                     'catalog_id' => $catalog->id,
-                ]);
+                ])->each(function ($catalogItem) use ($file) {
+                    // var_dump($file->keys());
+                    $temp = $file->shift();
+
+                    $catalogItem->picture = $temp;
+                    $catalogItem->save();
+
+                    $file->push($temp);
+                });
             });
         });
     }
