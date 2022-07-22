@@ -19,11 +19,11 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->text('profile_picture')->nullable();
-            $table->text('address');
-            $table->string('district');
-            $table->string('city');
-            $table->string('province');
-            $table->string('zip_code');
+            $table->text('address')->nullable();
+            $table->string('district')->nullable();
+            $table->string('city')->nullable();
+            $table->string('province')->nullable();
+            $table->string('zip_code')->nullable();
             $table->string('phone_number')->nullable();
             $table->timestamps();
             $table->softDeletes();

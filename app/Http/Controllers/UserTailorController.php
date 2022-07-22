@@ -101,7 +101,11 @@ class UserTailorController extends Controller
 
             $query = UserTailor::joinSub($rating, 'rating', function ($join) {
                 $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', "rating.total_review", 'user_tailor_details.id as profile_id')->where('is_ready', 1);
+            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', "rating.total_review", 'user_tailor_details.id as profile_id');
+
+            if (!$req->has('all')) {
+                $query = $query->where('is_ready', 1);
+            }
 
             if ($recommended) {
                 $query = $query->where('is_premium', 1)->orderByDesc('rating');
@@ -111,11 +115,11 @@ class UserTailorController extends Controller
                 $premium = $premium == null || $premium >= 1 ? 1 : $premium;
                 $query = $query->where('is_premium', +$premium);
             }
-            if ($speciality) {
-                $query->whereHas('profile', function ($q) use ($speciality) {
-                    $q->where(DB::raw('lower(speciality)'), $speciality);
-                });
-            }
+            // if ($speciality) {
+            //     $query->whereHas('profile', function ($q) use ($speciality) {
+            //         $q->where(DB::raw('lower(speciality)'), $speciality);
+            //     });
+            // }
             if ($search) {
                 $query->whereHas('profile', function ($q) use ($search) {
                     $q->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($search) . '%')
