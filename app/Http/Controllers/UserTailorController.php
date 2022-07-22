@@ -188,7 +188,7 @@ class UserTailorController extends Controller
                 'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
-                'address' => ['nullable', 'string', 'max:255'],
+                'address' => ['required', 'string', 'max:255'],
                 'district' => ['required', 'string', 'max:255'],
                 'city' => ['required', 'string', 'max:255'],
                 'province' => ['required', 'string', 'max:255'],
