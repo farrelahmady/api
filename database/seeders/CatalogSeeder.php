@@ -55,7 +55,7 @@ class CatalogSeeder extends Seeder
                     // var_dump($file->keys());
                     $temp = $file->shift();
 
-                    $catalogItem->picture = $temp;
+                    $catalogItem->picture = asset("storage/" . $temp);
                     $catalogItem->save();
 
                     $file->push($temp);
