@@ -88,7 +88,7 @@ class PasswordController extends Controller
       $user = $user_type == 'tailor' ? new UserTailor() : new UserCustomer();
 
       $user = $user->where('email', $validData['email'])->update([
-        'password' => Hash::make($validData['new_password']),
+        'password' => Hash::make($validData['password']),
       ]);
 
 
