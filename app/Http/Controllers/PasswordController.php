@@ -37,7 +37,7 @@ class PasswordController extends Controller
         return ResponseFormatter::error([], 'User not found', 404);
       }
 
-      $url = 'http://secret-forest-17845.herokuapp.com/reset-password?email=' . $email . '&token=' . $token;
+      $url = 'https://secret-forest-17845.herokuapp.com/reset-password?email=' . $email . '&token=' . $token;
       Mail::send('email.resetPasswordMail', ['url' => $url, 'user' => $user], function ($message) use ($user) {
         $message->to($user->email, $user->profile->first_name . " " . $user->profile->last_name)->subject('Reset Password');
       });
