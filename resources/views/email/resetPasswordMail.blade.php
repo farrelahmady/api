@@ -23,14 +23,18 @@
             your
             password by clicking the link below</p>
 
-        <form action="{{ $url }}" method="post">
+        <a href="{{ $url }}"
+            class="background-color: #2C96F1;border-radius: 0.5rem;color:white;padding: 1rem 0.5rem; font-weight:500">Reset
+            Your Password</a>
+
+        {{-- <form action="{{ $url }}" method="post">
             <input type="hidden" name="token">
             <input type="hidden" name="email">
             <button type="submit"
                 style="background-color: #2C96F1;border-radius: 0.5rem;color:white;padding: 1rem 0.5rem; font-weight:500">Reset
                 yout
                 Password</button>
-        </form>
+        </form> --}}
     </section>
 </body>
 
