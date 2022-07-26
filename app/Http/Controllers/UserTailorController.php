@@ -84,7 +84,6 @@ class UserTailorController extends Controller
             $paginate = $req->paginate;
             $limit = $req->limit;
             $premium = $req->input('premium');
-            $speciality = $req->input('speciality');
             $search = $req->input('search');
             $name = $req->input('name');
             $address = $req->input('address');

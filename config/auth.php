@@ -2,7 +2,7 @@
 
 return [
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------
@@ -13,12 +13,12 @@ return [
     |
     */
 
-  'defaults' => [
-    'guard' => 'web',
-    'passwords' => 'users',
-  ],
+    'defaults' => [
+        'guard' => 'web',
+        'passwords' => 'users',
+    ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------
@@ -35,22 +35,22 @@ return [
     |
     */
 
-  'guards' => [
-    'web' => [
-      'driver' => 'session',
-      'provider' => 'users',
+    'guards' => [
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'userCustomer' => [
+            'driver' => 'session',
+            'provider' => 'userCustomers',
+        ],
+        'userTailor' => [
+            'driver' => 'session',
+            'provider' => 'userTailors',
+        ],
     ],
-    'userCustomer' => [
-      'driver' => 'session',
-      'provider' => 'userCustomers',
-    ],
-    'userTailor' => [
-      'driver' => 'session',
-      'provider' => 'userTailors',
-    ],
-  ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | User Providers
     |--------------------------------------------------------------------------
@@ -67,27 +67,27 @@ return [
     |
     */
 
-  'providers' => [
-    'users' => [
-      'driver' => 'eloquent',
-      'model' => App\Models\User::class,
-    ],
-    'userCustomers' => [
-      'driver' => 'eloquent',
-      'model' => App\Models\User\UserCustomer::class,
-    ],
-    'userTailors' => [
-      'driver' => 'eloquent',
-      'model' => App\Models\User\UserTailor::class,
+    'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+        'userCustomers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User\UserCustomer::class,
+        ],
+        'userTailors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User\UserTailor::class,
+        ],
+
+        // 'users' => [
+        //     'driver' => 'database',
+        //     'table' => 'users',
+        // ],
     ],
 
-    // 'users' => [
-    //     'driver' => 'database',
-    //     'table' => 'users',
-    // ],
-  ],
-
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Resetting Passwords
     |--------------------------------------------------------------------------
@@ -102,16 +102,26 @@ return [
     |
     */
 
-  'passwords' => [
-    'users' => [
-      'provider' => 'users',
-      'table' => 'password_resets',
-      'expire' => 60,
-      'throttle' => 60,
+    'passwords' => [
+        'users' => [
+            'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'customer' => [
+            'provider' => 'userCustomers',
+            'table' => 'password_resets',
+            'expire' => 5,
+        ],
+        'tailor' => [
+            'provider' => 'userTailors',
+            'table' => 'password_resets',
+            'expire' => 5,
+        ],
     ],
-  ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
@@ -122,6 +132,6 @@ return [
     |
     */
 
-  'password_timeout' => 10800,
+    'password_timeout' => 10800,
 
 ];
