@@ -98,7 +98,7 @@ class PasswordController extends Controller
             // Here we will attempt to reset the user's password. If it is successful we
             // will update the password on an actual user model and persist it to the
             // database. Otherwise we will parse the error and return the response.
-            $status = Password::broker('customer')->reset(
+            $status = Password::broker($user_type)->reset(
                 $request->only('email', 'password', 'token'),
                 function ($user) use ($request) {
                     return $user;
