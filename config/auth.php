@@ -112,12 +112,12 @@ return [
         'customer' => [
             'provider' => 'userCustomers',
             'table' => 'password_resets',
-            'expire' => 5,
+            'expire' => 1,
         ],
         'tailor' => [
             'provider' => 'userTailors',
             'table' => 'password_resets',
-            'expire' => 5,
+            'expire' => 1,
         ],
     ],
 

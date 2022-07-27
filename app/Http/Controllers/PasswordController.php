@@ -101,22 +101,25 @@ class PasswordController extends Controller
             $status = Password::broker($user_type)->reset(
                 $request->only('email', 'password', 'token'),
                 function ($user) use ($request) {
-                    return $user;
-                    $user->forceFill([
+                    // dd($user);
+                    $user->update([
                         'password' => Hash::make($request->password)
-                    ])->save();
+                    ]);
 
                     event(new PasswordReset($user));
                 }
             );
-            // return $status;
 
             // If the password was successfully reset, we will redirect the user back to
             // the application's home authenticated view. If there is an error we can
             // redirect them back to where they came from with their error message.
-            return $status == Password::PASSWORD_RESET
-                ? ResponseFormatter::success(null, __($status))
-                : ResponseFormatter::error(['error' => __($status)], 'Something went wrong', 500);
+            if ($status == Password::PASSWORD_RESET) {
+
+                return ResponseFormatter::success(null, __($status));
+            } else {
+                # code...
+                return ResponseFormatter::error(['error' => __($status)], 'Something went wrong', 500);
+            }
 
 
             $validData = $validator->validated();

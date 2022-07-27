@@ -40,7 +40,7 @@ class CatalogSeeder extends Seeder
         // $files['upper']['kaos'] = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/kaos') !== false)->values();
 
         $keys = $files->keys();
-        var_dump($files[$keys->random()]->keys());
+        // var_dump($files[$keys->random()]->keys());
         UserTailor::all()->each(function ($tailor) use ($files, $keys) {
             CatalogFactory::new()->count(rand(1, 5))->create([
                 'user_tailor_id' => $tailor->uuid,

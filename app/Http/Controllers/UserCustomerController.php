@@ -19,7 +19,8 @@ class UserCustomerController extends Controller
     public function login(Request $request)
     {
         try {
-            if (auth('sanctum')->check() || auth('userCustomer')->check()) {
+            if (auth('sanctum')->check()) {
+                return $request->user('userCustomer')->currentAccessToken()->delete();
                 return ResponseFormatter::success(
                     'You are already logged in.',
                     [
@@ -29,7 +30,6 @@ class UserCustomerController extends Controller
                     ]
                 );
             } else {
-
                 $validator = Validator::make($request->all(), [
                     'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_customers,email'],
                     'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
@@ -56,7 +56,7 @@ class UserCustomerController extends Controller
                 }
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', 500);
         }
     }
 
