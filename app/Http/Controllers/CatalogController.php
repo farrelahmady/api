@@ -40,7 +40,7 @@ class CatalogController extends Controller
             $catalog = $catalog->orderBy("name")->get();
 
             if ($catalog->count() <= 0) {
-                return ResponseFormatter::error(null, 'Catalog not found', 404);
+                return ResponseFormatter::error(['error' => "katalog tidak ditemukan"], 'katalog tidak ditemukan', 404);
             }
 
             return ResponseFormatter::success($catalog, "Catalog retrieved successfully");

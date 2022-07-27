@@ -88,7 +88,8 @@ class PasswordController extends Controller
             $validator = Validator::make($request->all(), [
                 'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'exists:user_'  . $user_type . 's,email'],
                 'token' => ['required'],
-                'password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()],
+                'password' => ['required', 'confirmed', 'string', RulesPassword::min(8)->numbers()->letters()],
+                'password_confirmation' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()]
             ]);
 
             if ($validator->fails()) {

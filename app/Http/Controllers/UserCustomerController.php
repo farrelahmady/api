@@ -36,7 +36,7 @@ class UserCustomerController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+                    return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
                 }
 
                 if (Auth::guard('userCustomer')->attempt(['email' => $request->email, 'password' => $request->password])) {
@@ -52,11 +52,11 @@ class UserCustomerController extends Controller
                         'Login Successful'
                     );
                 } else {
-                    return ResponseFormatter::error([], 'Invalid Credentials', 401);
+                    return ResponseFormatter::error([], 'Kredensial tidak valid', 401);
                 }
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', 500);
+            return ResponseFormatter::error($err->getMessage(), 'Terdapat kesalahan', 500);
         }
     }
 
@@ -65,12 +65,12 @@ class UserCustomerController extends Controller
         try {
             if (auth('sanctum')->check()) {
                 $token = auth('sanctum')->user()->currentAccessToken()->delete();
-                return ResponseFormatter::success(['token' => $token], 'Logout Successful');
+                return ResponseFormatter::success(['token' => $token], 'Logout berhasi');
             } else {
-                return ResponseFormatter::error('You are not logged in.', 'Logout Failed', 401);
+                return ResponseFormatter::error('Anda belum login.', 'Logout gagal', 401);
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+            return ResponseFormatter::error($err->getMessage(), 'Terdapat kesalahan', $err->getCode());
         }
     }
     /**
@@ -106,7 +106,7 @@ class UserCustomerController extends Controller
 
 
             if ($validator->fails()) {
-                return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+                return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
             }
 
 
@@ -129,7 +129,7 @@ class UserCustomerController extends Controller
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
                 'user' => $userCustomer
-            ], 'User Customer Created Successfully');
+            ], 'user customer berhasil dibuat');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), $e->getMessage(), 500);
         }
