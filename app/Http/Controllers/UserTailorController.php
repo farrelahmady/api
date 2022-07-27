@@ -55,7 +55,7 @@ class UserTailorController extends Controller
                 }
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', $err->getCode());
         }
     }
 
@@ -69,7 +69,7 @@ class UserTailorController extends Controller
                 return ResponseFormatter::error('You are not logged in.', 'Logout Failed', 401);
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', $err->getCode());
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', $err->getCode());
         }
     }
     /**
@@ -96,7 +96,7 @@ class UserTailorController extends Controller
                 ->groupBy('user_tailor_id');
 
             // $rating = DB::table('reviews')->selectRaw("COUNT(rating) as total, user_tailor_id, CAST(AVG(rating) AS DECIMAL(5,0)) as rating")->groupBy("user_tailor_id")->get();
-            // return ResponseFormatter::success($rating, "Rating retrieved successfully");
+            // return ResponseFormatter::success($rating, "Rating berhasil dit");
 
             $query = UserTailor::joinSub($rating, 'rating', function ($join) {
                 $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
@@ -167,9 +167,9 @@ class UserTailorController extends Controller
                 return ResponseFormatter::error(null, 'No Tailor found', 404);
             }
 
-            return ResponseFormatter::success($query, 'Tailors retrieved successfully');
+            return ResponseFormatter::success($query, 'Tailors berhasil ditemukan');
         } catch (\Exception $e) {
-            return ResponseFormatter::error($e->getMessage(), 'Something Went Wrong', 500);
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
         }
     }
 
@@ -223,7 +223,7 @@ class UserTailorController extends Controller
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
                 'user' => $userTailor
-            ], 'User Tailor Created Successfully');
+            ], 'User Tailor berhasil dibuat');
         } catch (\Exception $e) {
             return ResponseFormatter::error(500, $e->getMessage(), 500);
         }
@@ -246,11 +246,11 @@ class UserTailorController extends Controller
             })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $uuid)->first();
             // $userTailor = UserTailor::with('profile')->find($uuid);
             if (!$userTailor) {
-                return ResponseFormatter::error(null, 'User Tailor not found', 404);
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
             }
-            return ResponseFormatter::success($userTailor, 'User Tailor retrieved successfully');
+            return ResponseFormatter::success($userTailor, 'User Tailor berhasil ditemukan');
         } catch (\Exception $e) {
-            return ResponseFormatter::error($e->getMessage(), 'Something Went Wrong', 500);
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
         }
     }
 

@@ -29,7 +29,7 @@ class PasswordController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+                return ResponseFormatter::error($validator->errors(), 'masukan tidak valid', 422);
             }
 
             // Password::broker('admins');
@@ -45,7 +45,7 @@ class PasswordController extends Controller
 
             return $status == Password::RESET_LINK_SENT
                 ? ResponseFormatter::success(null, __($status))
-                : ResponseFormatter::error(['error' => __($status)], 'Something went wrong', 500);
+                : ResponseFormatter::error(['error' => __($status)], 'terjadi kesalahan', 500);
 
             //     $email = $validator->validated()['email'];
             // $token = Str::random(64);
@@ -77,7 +77,7 @@ class PasswordController extends Controller
             // );
         } catch (\Exception $err) {
             // return $err->getCode();
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', 500);
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', 500);
         }
     }
 
@@ -93,7 +93,7 @@ class PasswordController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return ResponseFormatter::error($validator->errors(), 'Invalid Input', 422);
+                return ResponseFormatter::error($validator->errors(), 'masukan tidak valid', 422);
             }
 
             // Here we will attempt to reset the user's password. If it is successful we
@@ -119,7 +119,7 @@ class PasswordController extends Controller
                 return ResponseFormatter::success(null, __($status));
             } else {
                 # code...
-                return ResponseFormatter::error(['error' => __($status)], 'Something went wrong', 500);
+                return ResponseFormatter::error(['error' => __($status)], 'terjadi kesalahan', 500);
             }
 
 
@@ -131,7 +131,7 @@ class PasswordController extends Controller
             ])->first();
 
             if (!$check_token) {
-                return ResponseFormatter::error([], 'Invalid token', 404);
+                return ResponseFormatter::error([], 'token tidak balid', 404);
             }
 
             $user = $user_type == 'tailor' ? new UserTailor() : new UserCustomer();
@@ -147,9 +147,9 @@ class PasswordController extends Controller
                 'token' => $validData['token'],
             ])->delete();
 
-            return ResponseFormatter::success([], 'Password has been reset successfully');
+            return ResponseFormatter::success([], 'Password telah berhasil diatur ulang');
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Something went wrong', 500);
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', 500);
         }
     }
 }

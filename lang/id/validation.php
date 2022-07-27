@@ -93,6 +93,13 @@ return [
     'not_regex'            => 'Format :attribute tidak valid.',
     'numeric'              => ':attribute harus berupa angka.',
     'password'             => 'Kata sandi salah.',
+    'password' => [
+        'letters' => ':attribute harus mengandung setidaknya satu huruf.',
+        'mixed' => ':attribute harus mengandung setidaknya satu huruf besar dan satu huruf kecil.',
+        'numbers' => ':attribute harus mengandung setidaknya satu bilangan.',
+        'symbols' => ':attribute harus mengandung setidaknya satu simbol.',
+        'uncompromised' => ':attribute yang diberikan telah muncul dalam kebocoran data. Silakan pilih :attribute yang berbeda.',
+    ],
     'present'              => ':attribute wajib ada.',
     'regex'                => 'Format :attribute tidak valid.',
     'required'             => ':attribute wajib diisi.',
@@ -145,5 +152,18 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        "first_name" => "nama depan",
+        "last_name" => "nama belakang",
+        "address" => "alamat",
+        "city" => "kota",
+        "district" => "kecamatan",
+        "province" => "provinsi",
+        "zip_code" => "kode pos",
+        "state" => "negara",
+        "phone_number" => "nomor telepon",
+        "password_confirmation" => "konfirmasi password",
+
+
+    ],
 ];

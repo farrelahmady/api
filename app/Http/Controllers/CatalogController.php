@@ -43,9 +43,9 @@ class CatalogController extends Controller
                 return ResponseFormatter::error(['error' => "katalog tidak ditemukan"], 'katalog tidak ditemukan', 404);
             }
 
-            return ResponseFormatter::success($catalog, "Catalog retrieved successfully");
+            return ResponseFormatter::success($catalog, "katalog berhasil didapatkan");
         } catch (\Exception $e) {
-            return ResponseFormatter::error($e->getMessage(), "Something went wrong", 500);
+            return ResponseFormatter::error($e->getMessage(), "Terjadi kesalahan", 500);
         }
     }
 
@@ -54,11 +54,11 @@ class CatalogController extends Controller
         try {
             $catalog = Catalog::with('item')->where('uuid', $uuid)->first();
             if (!$catalog) {
-                return ResponseFormatter::error(null, 'Catalog not found', 404);
+                return ResponseFormatter::error(null, 'katalog tidak ditemukan', 404);
             }
-            return ResponseFormatter::success($catalog, "Catalog retrieved successfully");
+            return ResponseFormatter::success($catalog, "katalog berhasil didapatkan");
         } catch (\Exception $e) {
-            return ResponseFormatter::error($e->getMessage(), "Something went wrong", 500);
+            return ResponseFormatter::error($e->getMessage(), "Terjadi kesalahan", 500);
         }
     }
 }

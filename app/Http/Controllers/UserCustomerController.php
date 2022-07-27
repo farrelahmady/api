@@ -22,7 +22,7 @@ class UserCustomerController extends Controller
             if (auth('sanctum')->check()) {
                 return $request->user('userCustomer')->currentAccessToken()->delete();
                 return ResponseFormatter::success(
-                    'You are already logged in.',
+                    'Anda telah login.',
                     [
                         'access_token' => auth('sanctum')->user()->token,
                         'token_type' => 'Bearer',
@@ -49,14 +49,14 @@ class UserCustomerController extends Controller
                             'token_type' => 'Bearer',
                             'user' => $user,
                         ],
-                        'Login Successful'
+                        'Login berhasil'
                     );
                 } else {
                     return ResponseFormatter::error([], 'Kredensial tidak valid', 401);
                 }
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Terdapat kesalahan', 500);
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', 500);
         }
     }
 
@@ -65,12 +65,12 @@ class UserCustomerController extends Controller
         try {
             if (auth('sanctum')->check()) {
                 $token = auth('sanctum')->user()->currentAccessToken()->delete();
-                return ResponseFormatter::success(['token' => $token], 'Logout berhasi');
+                return ResponseFormatter::success(['token' => $token], 'Logout berhasil');
             } else {
                 return ResponseFormatter::error('Anda belum login.', 'Logout gagal', 401);
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'Terdapat kesalahan', $err->getCode());
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', $err->getCode());
         }
     }
     /**
