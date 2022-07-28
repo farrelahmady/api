@@ -41,9 +41,9 @@ Route::controller(UserCustomerController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/customer/logout', 'logout')->name('customer.logout');
         Route::get('/customer', 'index');
-        Route::get('/customer/{id}', 'show');
-        Route::put('/customer/{id}', 'update');
-        Route::delete('/customer/{id}', 'destroy');
+        Route::get('/customer/{uuid}', 'show');
+        Route::post('/customer/{uuid}', 'update');
+        Route::delete('/customer/{uuid}', 'destroy');
     });
 });
 

@@ -19,7 +19,7 @@ class UserCustomerSeeder extends Seeder
      */
     public function run()
     {
-        $files = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/customer/profile/avatar-') !== false)->values();
+        $files = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/customer/profile/') !== false)->values();
 
         echo $files->count() . " files found. ";
         echo "Seeding UserCustomer...\n";

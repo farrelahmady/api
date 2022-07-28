@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User\UserCustomer;
 use App\Helpers\ResponseFormatter;
@@ -10,9 +12,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use function PHPUnit\Framework\fileExists;
+
 use App\Models\ManagementAccess\UserCustomerDetail;
 use Illuminate\Validation\Rules\Password as RulesPassword;
-
 
 class UserCustomerController extends Controller
 {
@@ -153,9 +156,63 @@ class UserCustomerController extends Controller
      * @param  \App\Models\UserCustomer  $userCustomer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserCustomer $userCustomer)
+    public function update(Request $request, $uuid)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'old_password' => [RulesPassword::min(8)->numbers()->letters()],
+                'password' => ["string", "confirmed",  RulesPassword::min(8)->numbers()->letters()],
+                'password_confirmation'  => ['required_with:password', "string", 'same:password',],
+                'first_name' => ['string', 'max:255'],
+                'last_name' => ['string', 'max:255'],
+                'address' => ['string', 'max:255'],
+                'district' => ['string', 'max:255'],
+                'city' => ['string', 'max:255'],
+                'province' => ['string', 'max:255'],
+                'zip_code' => ['string', 'max:255'],
+                'profile_picture' => ["image", 'max:2048', 'mimes:jpeg,png,jpg,gif,svg'],
+            ]);
+
+            if ($validator->fails()) {
+                return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
+            }
+            $validatedData = $validator->validated();
+            $userCustomer = UserCustomer::where('uuid', $uuid)->first();
+
+            if (!$userCustomer) {
+                return ResponseFormatter::error([], 'User Customer tidak ditemukan', 404);
+            }
+
+
+            if (isset($validatedData['password'])) {
+                if (!Hash::check($request['old_password'], $userCustomer->password)) return ResponseFormatter::error(["password" => 'Password lama tidak sesuai'], 'Password lama tidak sesuai', 422);
+                $validatedData['password'] = Hash::make($validatedData['password']);
+            }
+
+            if ($request->hasFile('profile_picture') && $request->file('profile_picture')->isValid()) {
+                if ($userCustomer->profile->profile_picture) {
+
+                    $path = substr($userCustomer->profile->profile_picture, strpos($userCustomer->profile->profile_picture, 'images'));
+                    Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+                }
+                # code...
+                $fileName = "cust-" . Str::random(20) . "." . $request->file('profile_picture')->getClientOriginalExtension();
+                $profilePicture = asset('storage/' . $request->file('profile_picture')->storeAs('images/customer/profile', $fileName, "public"));
+                if ($profilePicture) {
+                    $validatedData['profile_picture'] = $profilePicture;
+                }
+            }
+
+
+
+
+            $userCustomer->update($validatedData);
+            $userCustomer->profile->update($validatedData);
+            $userCustomer = UserCustomer::with('profile')->find($userCustomer->id)->makeHidden(['created_at', 'updated_at']);
+            return ResponseFormatter::success($userCustomer, 'user customer berhasil diupdate');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
     }
 
     /**
@@ -167,5 +224,6 @@ class UserCustomerController extends Controller
     public function destroy(UserCustomer $userCustomer)
     {
         //
+
     }
 }
