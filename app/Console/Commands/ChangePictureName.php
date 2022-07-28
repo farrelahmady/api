@@ -52,5 +52,13 @@ class ChangePictureName extends Command
             Storage::disk('public')->move($file, $newName);
         });
         echo Carbon::now()->toDateTimeString() . ": " . $place->count() . " tailor place files found.\n";
+
+        $celanaPendek = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/celanaPendek/') !== false)->values();
+        $celanaPendek->each(function ($file) {
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            $newName = "images/tailor/catalog/celana-pendek/celana-pendek-"  . \Str::random($length = 16) . "-" . Carbon::now()->toDateString()  . "." . $extension;
+            Storage::disk('public')->move($file, $newName);
+        });
+        echo Carbon::now()->toDateTimeString() . ": " . $celanaPendek->count() . " celana pendek picture files found.\n";
     }
 }

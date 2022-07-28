@@ -144,9 +144,18 @@ class UserCustomerController extends Controller
      * @param  \App\Models\UserCustomer  $userCustomer
      * @return \Illuminate\Http\Response
      */
-    public function show(UserCustomer $userCustomer)
+    public function show($uuid)
     {
-        //
+        try {
+            $userCustomer = Auth::guard('userCustomer')->user();
+            if (!$userCustomer) {
+                return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
+            }
+            $userCustomer = $userCustomer->load('profile');
+            return ResponseFormatter::success($userCustomer, 'User Customer berhasil ditemukan');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
+        }
     }
 
     /**
