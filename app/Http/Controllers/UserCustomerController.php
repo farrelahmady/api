@@ -196,7 +196,7 @@ class UserCustomerController extends Controller
                     Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
                 }
                 # code...
-                $fileName = "cust-" . Str::random(20) . "." . $request->file('profile_picture')->getClientOriginalExtension();
+                $fileName = "cust-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $request->file('profile_picture')->getClientOriginalExtension();
                 $profilePicture = asset('storage/' . $request->file('profile_picture')->storeAs('images/customer/profile', $fileName, "public"));
                 if ($profilePicture) {
                     $validatedData['profile_picture'] = $profilePicture;
