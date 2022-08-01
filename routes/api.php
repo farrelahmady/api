@@ -38,7 +38,9 @@ Route::controller(UserCustomerController::class)->group(function () {
     Route::post('/customer', 'store')->name('customer.register');
     Route::post('/customer/login', 'login')->name('customer.login');
 
-    Route::delete('/customer/{uuid}', 'destroy');
+    Route::delete('/customer/{uuid}', 'delete');
+    Route::delete('/customer/trash/{uuid}', 'destroy');
+    Route::post('/customer/trash/{uuid}', 'restore');
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/customer/logout', 'logout')->name('customer.logout');
         Route::get('/customer', 'index');

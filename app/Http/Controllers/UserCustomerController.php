@@ -288,15 +288,48 @@ class UserCustomerController extends Controller
      * @param  \App\Models\UserCustomer  $userCustomer
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $uuid)
+    public function delete(Request $request, $uuid)
     {
         try {
-            $userCustomer = UserCustomer::withTrashed()->where('uuid', $uuid)->first();
+            $userCustomer = UserCustomer::where('uuid', $uuid)->first();
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
             $userCustomer->delete();
             return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
+    }
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\UserCustomer  $userCustomer
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $uuid)
+    {
+        try {
+            $userCustomer = UserCustomer::onlyTrashed()->where('uuid', $uuid)->first();
+            if (!$userCustomer) {
+                return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
+            }
+            $userCustomer->forceDelete();
+            return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
+    }
+
+    public function restore($uuid)
+    {
+        try {
+            $userCustomer = UserCustomer::onlyTrashed()->where('uuid', $uuid)->first();
+            if (!$userCustomer) {
+                return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
+            }
+            $userCustomer->restore();
+            return ResponseFormatter::success(null, 'User Customer berhasil direstore');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
         }
