@@ -288,9 +288,17 @@ class UserCustomerController extends Controller
      * @param  \App\Models\UserCustomer  $userCustomer
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserCustomer $userCustomer)
+    public function destroy(Request $request, $uuid)
     {
-        //
-
+        try {
+            $userCustomer = UserCustomer::withTrashed()->where('uuid', $uuid)->first();
+            if (!$userCustomer) {
+                return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
+            }
+            $userCustomer->delete();
+            return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
     }
 }

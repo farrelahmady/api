@@ -38,12 +38,12 @@ Route::controller(UserCustomerController::class)->group(function () {
     Route::post('/customer', 'store')->name('customer.register');
     Route::post('/customer/login', 'login')->name('customer.login');
 
+    Route::delete('/customer/{uuid}', 'destroy');
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/customer/logout', 'logout')->name('customer.logout');
         Route::get('/customer', 'index');
         Route::get('/customer/{uuid}', 'show');
         Route::post('/customer/{uuid}', 'update');
-        Route::delete('/customer/{uuid}', 'destroy');
     });
 });
 
