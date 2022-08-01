@@ -10,10 +10,11 @@ use App\Helpers\ResponseFormatter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use function PHPUnit\Framework\fileExists;
 
+use function PHPUnit\Framework\fileExists;
 use App\Models\ManagementAccess\UserCustomerDetail;
 use Illuminate\Validation\Rules\Password as RulesPassword;
 
@@ -81,8 +82,66 @@ class UserCustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
+
+        try {
+            $paginate = $req->paginate;
+            $limit = $req->limit;
+            $search = $req->input('search');
+            $name = $req->input('name');
+            $address = $req->input('address');
+            $sort = $req->input('sort');
+            $order = $req->input('order', 'asc');
+
+            $query = DB::table('user_customers')
+                ->join('user_customer_details', 'user_customers.id', '=', 'user_customer_details.user_customer_id')
+                ->select('user_customers.*', 'user_customer_details.*');
+
+
+            if ($search) {
+                $query->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(address)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($search) . '%')
+                    ->orWhere(DB::raw('lower(city)'), 'like', '%' . strtolower($search) . '%');
+            }
+
+            if ($name) {
+                $query->where(DB::raw('lower(first_name)'), 'like', '%' . strtolower($name) . '%')
+                    ->orWhere(DB::raw('lower(last_name)'), 'like', '%' . strtolower($name) . '%');
+            }
+
+            if ($address) {
+                $query->where(DB::raw('lower(address)'), 'like', '%' . strtolower($address) . '%')
+                    ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($address) . '%')
+                    ->orWhere(DB::raw('lower(city)'), 'like', '%' . strtolower($address) . '%')
+                    ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($address) . '%');
+            }
+            if ($limit) {
+                $query = $query->take($limit);
+            }
+            if ($sort) {
+                // return $order;
+                $sort = explode(',', $sort);
+                foreach ($sort as $s) {
+                    if (in_array($s, Schema::getColumnListing('user_customer_details')) || in_array($s, Schema::getColumnListing('user_customers'))) {
+                        $query = $query->orderBy($s, $order);
+                    }
+                }
+            }
+            $query = $paginate ? $query->paginate($paginate) : $query->get();
+
+
+            if ($query->count() <= 0) {
+                return ResponseFormatter::error(null, 'Customer tidak ditemukan', 404);
+            }
+
+            return ResponseFormatter::success($query, $query->count() . ' Customers berhasil ditemukan');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
+        }
     }
 
     /**

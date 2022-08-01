@@ -43,7 +43,7 @@ class CatalogController extends Controller
                 return ResponseFormatter::error(['error' => "katalog tidak ditemukan"], 'katalog tidak ditemukan', 404);
             }
 
-            return ResponseFormatter::success($catalog, "katalog berhasil didapatkan");
+            return ResponseFormatter::success($catalog, $catalog->count() . " katalog berhasil didapatkan");
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "Terjadi kesalahan", 500);
         }

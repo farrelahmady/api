@@ -167,7 +167,7 @@ class UserTailorController extends Controller
                 return ResponseFormatter::error(null, 'No Tailor found', 404);
             }
 
-            return ResponseFormatter::success($query, 'Tailors berhasil ditemukan');
+            return ResponseFormatter::success($query, $query->count() . ' Tailors berhasil ditemukan');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
         }
