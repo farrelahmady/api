@@ -147,11 +147,10 @@ class UserCustomerController extends Controller
     public function show($uuid)
     {
         try {
-            $userCustomer = Auth::guard('userCustomer')->user();
+            $userCustomer = UserCustomer::with('profile')->where('uuid', $uuid)->first();
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
-            $userCustomer = $userCustomer->load('profile');
             return ResponseFormatter::success($userCustomer, 'User Customer berhasil ditemukan');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
