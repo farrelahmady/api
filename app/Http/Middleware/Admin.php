@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Helpers\ResponseFormatter;
+use App\Models\User\Admin as UserAdmin;
 use App\Models\User\UserTailor;
 use Closure;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class Admin
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!in_array($request->user('sanctum')->email, UserTailor::pluck('email')->toArray())) {
+        if (!in_array($request->user('sanctum')->uuid, UserAdmin::pluck('uuid')->toArray())) {
             return ResponseFormatter::error(["message" => "Kamu tidak memiliki akses"], 'Forbidden', 403);
         }
         return $next($request);
