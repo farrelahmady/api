@@ -230,20 +230,20 @@ class UserCustomerController extends Controller
                 'old_password' => [RulesPassword::min(8)->numbers()->letters()],
                 'password' => ["string", "confirmed",  RulesPassword::min(8)->numbers()->letters()],
                 'password_confirmation'  => ['required_with:password', "string", 'same:password',],
-                'first_name' => ['string', 'max:255'],
-                'last_name' => ['string', 'max:255'],
-                'address' => ['string', 'max:255'],
-                'district' => ['string', 'max:255'],
-                'city' => ['string', 'max:255'],
-                'province' => ['string', 'max:255'],
-                'zip_code' => ['string', 'max:255'],
-                'profile_picture' => ["image", 'max:2048', 'mimes:jpeg,png,jpg,gif,svg'],
+                'first_name' => ['nullable', 'string', 'max:255'],
+                'last_name' => ['nullable', 'string', 'max:255'],
+                'address' => ['nullable', 'string', 'max:255'],
+                'district' => ['nullable', 'string', 'max:255'],
+                'city' => ['nullable', 'string', 'max:255'],
+                'province' => ['nullable', 'string', 'max:255'],
+                'zip_code' => ['nullable', 'string', 'max:255'],
+                'profile_picture' => ["nullable", "image", 'max:2048', 'mimes:jpeg,png,jpg,gif,svg'],
             ]);
 
             if ($validator->fails()) {
                 return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
             }
-            $validatedData = $validator->validated();
+            $validatedData = collect($validator->validated());
             $userCustomer = UserCustomer::where('uuid', $uuid)->first();
 
             if (!$userCustomer) {
@@ -269,8 +269,13 @@ class UserCustomerController extends Controller
                     $validatedData['profile_picture'] = $profilePicture;
                 }
             }
+            $validatedData->keys()->each(function ($key) use ($validatedData, $userCustomer) {
+                if ($validatedData[$key] === null) {
+                    $validatedData->forget($key);
+                }
+            });
 
-
+            $validatedData = $validatedData->toArray();
 
 
             $userCustomer->update($validatedData);
@@ -290,12 +295,16 @@ class UserCustomerController extends Controller
      */
     public function delete(Request $request, $uuid)
     {
+        // return UserCustomer::class;
         try {
             $userCustomer = UserCustomer::where('uuid', $uuid)->first();
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
             $userCustomer->delete();
+            $userCustomer->profile->delete();
+            $userCustomer->tokens()->delete();
+
             return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
@@ -315,6 +324,11 @@ class UserCustomerController extends Controller
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
             $userCustomer->forceDelete();
+            if ($userCustomer->profile->profile_picture) {
+
+                $path = substr($userCustomer->profile->profile_picture, strpos($userCustomer->profile->profile_picture, 'images'));
+                Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+            }
             return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
@@ -325,11 +339,14 @@ class UserCustomerController extends Controller
     {
         try {
             $userCustomer = UserCustomer::onlyTrashed()->where('uuid', $uuid)->first();
+            $profile = UserCustomerDetail::onlyTrashed()->where('user_customer_id', $userCustomer->id)->first();
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
             $userCustomer->restore();
-            return ResponseFormatter::success(null, 'User Customer berhasil direstore');
+            $profile->restore();
+            $userCustomer = UserCustomer::with('profile')->find($userCustomer->id)->makeHidden(['created_at', 'updated_at']);
+            return ResponseFormatter::success($userCustomer, 'User Customer berhasil direstore');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
         }
