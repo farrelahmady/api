@@ -24,14 +24,11 @@ class UserCustomerController extends Controller
     {
         try {
             if (auth('sanctum')->check()) {
-                return $request->user('userCustomer')->currentAccessToken()->delete();
                 return ResponseFormatter::success(
-                    'Anda telah login.',
                     [
-                        'access_token' => auth('sanctum')->user()->token,
-                        'token_type' => 'Bearer',
-                        'user' => auth('sanctum')->user(),
-                    ]
+                        'user' => auth('userCustomer')->user()
+                    ],
+                    'Anda telah login.',
                 );
             } else {
                 $validator = Validator::make($request->all(), [
@@ -323,12 +320,12 @@ class UserCustomerController extends Controller
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
-            $userCustomer->forceDelete();
+            // return $userCustomer->profile;
             if ($userCustomer->profile->profile_picture) {
-
                 $path = substr($userCustomer->profile->profile_picture, strpos($userCustomer->profile->profile_picture, 'images'));
                 Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
             }
+            $userCustomer->forceDelete();
             return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
@@ -339,12 +336,14 @@ class UserCustomerController extends Controller
     {
         try {
             $userCustomer = UserCustomer::onlyTrashed()->where('uuid', $uuid)->first();
-            $profile = UserCustomerDetail::onlyTrashed()->where('user_customer_id', $userCustomer->id)->first();
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }
+            $profile = UserCustomerDetail::onlyTrashed()->where('user_customer_id', $userCustomer->id)->first();
+            if ($profile) {
+                $profile->restore();
+            }
             $userCustomer->restore();
-            $profile->restore();
             $userCustomer = UserCustomer::with('profile')->find($userCustomer->id)->makeHidden(['created_at', 'updated_at']);
             return ResponseFormatter::success($userCustomer, 'User Customer berhasil direstore');
         } catch (\Exception $e) {

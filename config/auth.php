@@ -1,7 +1,9 @@
 <?php
 
 return [
-
+    "admin" => [
+        "tailor@gmail.com"
+    ],
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults

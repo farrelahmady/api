@@ -26,6 +26,6 @@ class UserCustomer extends Authenticatable
 
     public function profile()
     {
-        return $this->hasOne(UserCustomerDetail::class, 'user_customer_id', 'id');
+        return $this->hasOne(UserCustomerDetail::class, 'user_customer_id', 'id')->withTrashed();
     }
 }

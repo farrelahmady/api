@@ -37,7 +37,6 @@ class UserCustomerSeeder extends Seeder
             'province' => 'Banten',
             'zip_code' => '15158',
             'profile_picture' => asset("storage/" . $files->shift()),
-
         ]);
         UserCustomerFactory::new()->count($files->count())->create()->each(function ($userCustomer) use ($files) {
             UserCustomerDetail::factory()->create([
