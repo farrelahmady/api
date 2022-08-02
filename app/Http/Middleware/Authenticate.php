@@ -16,7 +16,7 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (!$request->expectsJson()) {
-            return abort(ResponseFormatter::error(401, 'Unauthorized', 401));
+            return abort(ResponseFormatter::error(null, 'Unauthorized', 401));
         }
     }
 }
