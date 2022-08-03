@@ -59,4 +59,8 @@ Route::controller(CatalogController::class)->group(function () {
 
 Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/login', 'login')->name('admin.login');
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/admin/logout', 'logout')->name('admin.logout');
+    });
 });
