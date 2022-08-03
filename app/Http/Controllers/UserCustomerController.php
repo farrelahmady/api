@@ -43,6 +43,7 @@ class UserCustomerController extends Controller
                 if (Auth::guard('userCustomer')->attempt(['email' => $request->email, 'password' => $request->password])) {
                     $user = Auth::guard('userCustomer')->user()->id;
                     $user = UserCustomer::with('profile')->find($user)->makeHidden(['created_at', 'updated_at']);
+                    $user->tokens()->delete();
                     $token = $user->createToken('authCustomer')->plainTextToken;
                     return ResponseFormatter::success(
                         [
@@ -65,7 +66,7 @@ class UserCustomerController extends Controller
     {
         try {
             if (auth('sanctum')->check()) {
-                $token = auth('sanctum')->user()->currentAccessToken()->delete();
+                $token = auth('sanctum')->user()->tokens()->delete();
                 return ResponseFormatter::success(['token' => $token], 'Logout berhasil');
             } else {
                 return ResponseFormatter::error('Anda belum login.', 'Logout gagal', 401);
@@ -181,6 +182,7 @@ class UserCustomerController extends Controller
 
             $userCustomer = UserCustomer::with('profile')->find($userCustomer)->makeHidden(['created_at', 'updated_at']);
 
+            $userCustomer->tokens()->delete();
             $tokenResult = $userCustomer->createToken('authCustomer')->plainTextToken;
 
 

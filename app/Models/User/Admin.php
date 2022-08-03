@@ -14,7 +14,7 @@ class Admin extends Authenticatable
     use HasFactory, SoftDeletes, HasApiTokens, HasUuid, Notifiable;
 
     protected $guard = 'admin';
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     protected $hidden = [
         'password',

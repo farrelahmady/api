@@ -50,6 +50,10 @@ return [
             'driver' => 'session',
             'provider' => 'userTailors',
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -81,6 +85,10 @@ return [
         'userTailors' => [
             'driver' => 'eloquent',
             'model' => App\Models\User\UserTailor::class,
+        ],
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User\Admin::class,
         ],
 
         // 'users' => [

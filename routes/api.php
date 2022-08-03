@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\PasswordController;
 use Illuminate\Http\Request;
@@ -54,4 +55,8 @@ Route::controller(UserCustomerController::class)->group(function () {
 Route::controller(CatalogController::class)->group(function () {
     Route::get('/catalog', 'index');
     Route::get('/catalog/{uuid}', 'show');
+});
+
+Route::controller(AdminController::class)->group(function () {
+    Route::post('/admin/login', 'login')->name('admin.login');
 });
