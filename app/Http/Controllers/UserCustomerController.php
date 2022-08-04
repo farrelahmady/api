@@ -264,9 +264,11 @@ class UserCustomerController extends Controller
                 # code...
                 $fileName = "cust-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $request->file('profile_picture')->getClientOriginalExtension();
                 $profilePicture = asset('storage/' . $request->file('profile_picture')->storeAs('images/customer/profile', $fileName, "public"));
-                if ($profilePicture) {
-                    $validatedData['profile_picture'] = $profilePicture;
+                // return ;
+                if (!Storage::disk('public')->exists(substr($profilePicture, strpos($profilePicture, 'images')))) {
+                    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
                 }
+                $validatedData['profile_picture'] =  $profilePicture;
             }
             $validatedData->keys()->each(function ($key) use ($validatedData, $userCustomer) {
                 if ($validatedData[$key] === null) {
