@@ -14,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-  return view('email.resetPasswordMail');
+    return abort(403, 'Forbidden');
 });
