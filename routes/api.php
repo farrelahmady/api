@@ -41,10 +41,10 @@ Route::controller(UserCustomerController::class)->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/customer/logout', 'logout')->name('customer.logout');
-        Route::get('/customer', 'index');
         Route::get('/customer/{uuid}', 'show');
         Route::post('/customer/{uuid}', 'update');
         Route::middleware('admin')->group(function () {
+            Route::get('/customer', 'index');
             Route::delete('/customer/{uuid}', 'delete');
             Route::delete('/customer/trash/{uuid}', 'destroy');
             Route::post('/customer/trash/{uuid}', 'restore');
