@@ -22,9 +22,7 @@ class UserCustomerDetailFactory extends Factory
             'last_name' => $this->faker->lastName,
             'profile_picture' => 'https://source.unsplash.com/240x240?people',
             'address' => $this->faker->address,
-            'district' => $this->faker->citySuffix,
-            'city' => $this->faker->city,
-            'province' => $this->faker->state,
+
             'zip_code' => $this->faker->postcode,
             'phone_number' => $this->faker->phoneNumber,
         ];

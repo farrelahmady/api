@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Session\Store;
 use App\Helpers\ResponseFormatter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use phpDocumentor\Reflection\Types\Null_;
@@ -65,6 +66,32 @@ class AdminController extends Controller
             } else {
                 return ResponseFormatter::error('Anda belum login.', 'Logout gagal', 401);
             }
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalaahan", 500);
+        }
+    }
+
+    public function changePassword(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'old_password' => ['required', 'string', RulesPassword::min(8)->numbers()->letters()->symbols()],
+                'password' => ['required_with:old_password', 'confirmed', 'string', RulesPassword::min(8)->numbers()->letters()->symbols()],
+                'password_confirmation' => ['required_with:password', 'string', RulesPassword::min(8)->numbers()->letters()->symbols()],
+            ]);
+            if ($validator->fails()) {
+                return ResponseFormatter::error($validator->errors(), "Invalid credentials", 401);
+            }
+            $user = Auth::guard('sanctum')->user();
+
+            // return $user;
+
+            if (!Hash::check($req->old_password, $user->password)) {
+                return ResponseFormatter::error(null, "Invalid credentials", 401);
+            }
+            $user->password = Hash::make($req->password);
+            $user->save();
+            return ResponseFormatter::success($user, "Password berhasil diubah");
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalaahan", 500);
         }

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User\UserTailor;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Database\Factories\User\UserTailorFactory;
 use App\Models\ManagementAccess\UserTailorDetail;
@@ -49,10 +50,23 @@ class UserTailorSeeder extends Seeder
                     'max_schedule_slot' => 5,
                 ]);
             }
+
+            $data["province"] = collect(Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi')->collect()['provinsi'])->random();
+
+            $provinsiId = $data["province"]["id"];
+            $data["province"] = $data["province"]["nama"];
+            $data["city"] = collect(Http::get("http://dev.farizdotid.com/api/daerahindonesia/kota?id_provinsi=$provinsiId")->collect()['kota_kabupaten'])->random();
+
+            $kotaId = $data["city"]["id"];
+            $data["city"] = $data["city"]["nama"];
+            $data["district"] = collect(Http::get("http://dev.farizdotid.com/api/daerahindonesia/kecamatan?id_kota=$kotaId")->collect()['kecamatan'])->random()["nama"];
             UserTailorDetail::factory()->create([
                 'profile_picture' => asset("storage/" . $profiles->shift()),
                 'place_picture' => asset("storage/" . $places->random()),
                 'user_tailor_id' => $userTailor->id,
+                'province' => $data["province"],
+                'city' => $data["city"],
+                'district' => $data["district"],
             ]);
         });
     }

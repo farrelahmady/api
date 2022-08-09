@@ -163,6 +163,7 @@ return [
         "state" => "negara",
         "phone_number" => "nomor telepon",
         "password_confirmation" => "konfirmasi password",
+        "old_password" => "password lama",
 
 
     ],
