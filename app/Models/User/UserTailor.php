@@ -2,15 +2,16 @@
 
 namespace App\Models\User;
 
+use App\Models\Availability;
+use App\Models\Traits\HasUuid;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Operational\Review;
 use Illuminate\Notifications\Notifiable;
+
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\ManagementAccess\UserTailorDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
-use App\Models\ManagementAccess\UserTailorDetail;
-use App\Models\Operational\Review;
-use App\Models\Traits\HasUuid;
 
 class UserTailor extends Authenticatable
 {
@@ -44,6 +45,11 @@ class UserTailor extends Authenticatable
     public function review()
     {
         return $this->hasMany(Review::class, 'user_tailor_id', 'id');
+    }
+
+    public function availability()
+    {
+        return $this->hasMany(Availability::class, 'user_tailor_id', 'id');
     }
 
     public function getRouteKeyName()
