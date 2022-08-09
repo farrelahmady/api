@@ -16,6 +16,7 @@ class CatalogController extends Controller
             $fabric = $req->input('fabric');
             $category = $req->input('category');
             $search = $req->input('search');
+            $limit = $req->input('limit');
 
             $catalog = Catalog::with('item');
 
@@ -35,6 +36,10 @@ class CatalogController extends Controller
                 $catalog = $catalog->where(DB::raw('lower(name)'), 'like', '%' . strtolower($search) . '%')
                     ->orWhere(DB::raw('lower(fabric)'), 'like', '%' . strtolower($search) . '%')
                     ->orWhere(DB::raw('lower(category)'), 'like', '%' . strtolower($search) . '%');
+            }
+
+            if ($limit) {
+                $catalog = $catalog->limit($limit);
             }
 
             $catalog = $catalog->orderBy("name")->get();
