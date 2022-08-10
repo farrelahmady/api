@@ -15,7 +15,10 @@ return new class extends Migration
     {
         Schema::create('availabilities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_tailor_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->uuid();
+            $table->foreignUuid('user_tailor_id')->constrained("user_tailors", "uuid")->onUpdate(
+                'cascade'
+            )->onDelete('cascade');
             $table->date('date');
             $table->time('time');
             $table->timestamps();

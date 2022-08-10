@@ -2,7 +2,7 @@
 
 namespace App\Models\User;
 
-use App\Models\Availability;
+use App\Models\ManagementAccess\Availability;
 use App\Models\Traits\HasUuid;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Operational\Review;

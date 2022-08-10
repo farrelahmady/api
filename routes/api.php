@@ -1,11 +1,13 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\PasswordController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Models\ManagementAccess\Availability;
 use App\Http\Controllers\UserTailorController;
+use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\UserCustomerController;
 
 /*
@@ -64,4 +66,12 @@ Route::controller(AdminController::class)->group(function () {
         Route::post('/admin/password/change', 'changePassword');
         Route::post('/admin/logout', 'logout')->name('admin.logout');
     });
+});
+
+Route::controller(AvailabilityController::class)->group(function () {
+    Route::get('/availability', 'index');
+    Route::get('/availability/{uuid}', 'show');
+    Route::post('/availability', 'store');
+    Route::put('/availability/{uuid}', 'update');
+    Route::delete('/availability/{uuid}', 'destroy');
 });

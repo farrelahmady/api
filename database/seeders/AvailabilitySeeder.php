@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Carbon\Carbon;
 use App\Models\User\UserTailor;
 use Illuminate\Database\Seeder;
+use App\Models\ManagementAccess\Availability;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class AvailabilitySeeder extends Seeder
@@ -46,13 +47,17 @@ class AvailabilitySeeder extends Seeder
                 $date->addDay();
             }
             $dateList = collect();
-            $data->keys()->each(function ($item) use ($dateList, $data) {
-                $data[$item]->each(function ($waktu) use ($dateList, $item) {
-                    $dateList->push(["date" => $item, "time" =>  $waktu]);
+            $data->keys()->each(function ($item) use ($dateList, $data, $user) {
+                $data[$item]->each(function ($waktu) use ($dateList, $item, $user) {
+                    $dateList->push(["date" => $item, "time" =>  $waktu, "user_tailor_id" => $user->uuid]);
                 });
             });
+            $dateList->each(function ($item) {
+                Availability::create($item);
+            });
+            // Availability::insert($dateList->toArray());
 
-            $user->availability()->createMany($dateList->toArray());
+            // Availability::create($dateList->toArray());
         });
     }
 }
