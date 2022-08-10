@@ -252,6 +252,25 @@ class UserTailorController extends Controller
             if (!$userTailor) {
                 return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
             }
+
+            $userTailor["availability"] = collect();
+            $userTailor->availability()->get(["date", "time",])->groupBy('date')->values()->each(function ($item) use (&$availability, $userTailor) {
+                $userTailor["availability"]->push([
+                    "date" => $item->first()->date,
+                    "time" => $item->pluck('time')->toArray()
+                ]);
+            });
+            $userTailor["availability"] = $userTailor["availability"]->count() > 0 ? $userTailor["availability"] : null;
+            // $availability = $availability->map(function ($item) {
+
+            //     return $item = collect([
+            //         'date' => $item->date,
+            //         'time' => $item->time,
+            //     ]);
+            // });
+
+            // return $availability;
+            // $userTailor["availability"] = $userTailor->availability()->get();
             return ResponseFormatter::success($userTailor, 'User Tailor berhasil ditemukan');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);

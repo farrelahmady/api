@@ -49,7 +49,7 @@ class UserTailor extends Authenticatable
 
     public function availability()
     {
-        return $this->hasMany(Availability::class, 'user_tailor_id', 'id');
+        return $this->hasMany(Availability::class, 'user_tailor_id', 'uuid');
     }
 
     public function getRouteKeyName()

@@ -1,7 +1,9 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Operational;
 
+
+use App\Models\User\UserCustomer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,9 @@ class AppointmentFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'status' => $this->faker->randomElement([1, 2, 3, 4, 5]),
+            'additional_message' => $this->faker->sentence,
+            'user_customer_id' => UserCustomer::all()->random()->uuid,
         ];
     }
 }
