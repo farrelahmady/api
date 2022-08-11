@@ -9,4 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Appointment extends Model
 {
     use HasFactory;
+
+    protected $table = 'appointments';
+
+    protected $guarded = ['id'];
 }

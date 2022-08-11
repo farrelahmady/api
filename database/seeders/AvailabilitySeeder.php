@@ -28,7 +28,7 @@ class AvailabilitySeeder extends Seeder
                 );
 
                 $temp = collect();
-                for ($j = 0; $j < 3; $j++) {
+                for ($j = 0; $j < $user->max_schedule_slot; $j++) {
                     do {
                         $time = Carbon::createFromTime(rand(6, 17), rand(0, 3) * 15);
                         // $time->settings(['formatFunction' => 'translatedFormat']);

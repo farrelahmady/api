@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\PasswordController;
 use App\Models\ManagementAccess\Availability;
@@ -74,4 +75,12 @@ Route::controller(AvailabilityController::class)->group(function () {
     Route::post('/availability', 'store');
     Route::put('/availability/{uuid}', 'update');
     Route::delete('/availability/{uuid}', 'destroy');
+});
+
+Route::controller(AppointmentController::class)->group(function () {
+    Route::post('/appointment', 'store')->middleware('auth:sanctum');
+    // Route::get('/appointment', 'index');
+    // Route::get('/appointment/{uuid}', 'show');
+    // Route::put('/appointment/{uuid}', 'update');
+    // Route::delete('/appointment/{uuid}', 'destroy');
 });

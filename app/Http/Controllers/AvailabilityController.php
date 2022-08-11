@@ -19,12 +19,12 @@ class AvailabilityController extends Controller
             $tailor = $req->input('tailor');
             $data = collect();
             if (count($req->all()) <= 0) {
-                // if (!auth('sanctum')->check()) {
-                //     return ResponseFormatter::error(message: 'Unauthorized', code: 401);
-                // }
-                // if (!in_array($req->user('sanctum')->uuid, UserAdmin::pluck('uuid')->toArray())) {
-                //     return ResponseFormatter::error(["message" => "Kamu tidak memiliki akses"], 'Forbidden', 403);
-                // }
+                if (!auth('sanctum')->check()) {
+                    return ResponseFormatter::error(message: 'Unauthorized', code: 401);
+                }
+                if (!in_array($req->user('sanctum')->uuid, UserAdmin::pluck('uuid')->toArray())) {
+                    return ResponseFormatter::error(["message" => "Kamu tidak memiliki akses"], 'Forbidden', 403);
+                }
                 $availability = Availability::all();
             } else {
                 $availability = Availability::where('user_tailor_id', $tailor)->get();

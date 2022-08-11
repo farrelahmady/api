@@ -164,6 +164,9 @@ return [
         "phone_number" => "nomor telepon",
         "password_confirmation" => "konfirmasi password",
         "old_password" => "password lama",
+        "additional_message" => "pesan tambahan",
+        "date" => "tanggal",
+        "time" => "waktu",
 
 
     ],

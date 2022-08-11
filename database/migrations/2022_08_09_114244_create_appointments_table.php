@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -23,6 +24,12 @@ return new class extends Migration
             $table->enum('status', [1, 2, 3, 4, 5])->default(1);
             $table->timestamps();
         });
+
+        DB::statement('DROP EVENT IF EXISTS appointments_status_update_scheduler');
+        DB::statement('CREATE EVENT appointments_status_update_scheduler ON SCHEDULE EVERY 1 MINUTE
+                        STARTS CURRENT_TIMESTAMP + INTERVAL 1 MINUTE
+                        DO
+                        UPDATE appointments SET status = 3 WHERE status = 2 AND CURDATE() >= date  AND CURRENT_TIME() >= time ');
     }
 
     /**
