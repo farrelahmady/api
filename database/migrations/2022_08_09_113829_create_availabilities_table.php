@@ -26,11 +26,14 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        DB::statement('DROP EVENT IF EXISTS availabilities_update_scheduler');
-        DB::statement('CREATE EVENT availabilities_update_scheduler ON SCHEDULE EVERY 1 DAY
+        if (env('DB_CONNECTION') === 'mysql') {
+            DB::statement('DROP EVENT IF EXISTS availabilities_update_scheduler');
+            DB::statement('CREATE EVENT availabilities_update_scheduler ON SCHEDULE EVERY 1 DAY
                         STARTS DATE_FORMAT(CURRENT_TIMESTAMP, \'%Y-%m-%d\') + INTERVAL 1 DAY
                         DO
                         UPDATE availabilities SET date = DATE_ADD(date, INTERVAL 14 DAY) WHERE CURDATE() >= date ');
+            # code...
+        }
     }
 
     /**
