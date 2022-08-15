@@ -188,7 +188,7 @@ class UserTailorController extends Controller
                 $sort = explode(',', $sort);
                 foreach ($sort as $s) {
                     if (in_array($s, Schema::getColumnListing('user_tailor_details')) || in_array($s, Schema::getColumnListing('user_tailors')) || $s == 'rating') {
-                        $query = $query->sortBy($s, $order);
+                        $query = $query->sortBy($s, $order)->values();
                     }
                 }
             }
