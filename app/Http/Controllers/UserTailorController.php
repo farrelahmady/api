@@ -43,12 +43,20 @@ class UserTailorController extends Controller
                     $user->tokens()->delete();
                     $token = $user->createToken('authTailor')->plainTextToken;
 
-                    $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
-                        ->groupBy('user_tailor_id');
 
-                    $userTailor = UserTailor::joinSub($rating, 'rating', function ($join) {
-                        $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-                    })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $user['uuid'])->first();
+                    $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $user->id)->first();
+
+                    $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $user['uuid'])->first();
+                    if ($rating === null) {
+                        $userTailor->rating = 0;
+                        $userTailor->total_review = 0;
+                    } else {
+                        collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
+                            if ($key != 'user_tailor_id') {
+                                $userTailor->{$key} = $rating->{$key};
+                            }
+                        });
+                    }
 
 
                     return ResponseFormatter::success(
@@ -64,7 +72,7 @@ class UserTailorController extends Controller
                 }
             }
         } catch (\Exception $err) {
-            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', $err->getCode());
+            return ResponseFormatter::error($err->getMessage(), 'terjadi kesalahan', 500);
         }
     }
 
@@ -101,15 +109,10 @@ class UserTailorController extends Controller
             $sort = $req->input('sort');
             $order = $req->input('order', 'asc');
 
-            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))
-                ->groupBy('user_tailor_id');
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->get();
 
-            // $rating = DB::table('reviews')->selectRaw("COUNT(rating) as total, user_tailor_id, CAST(AVG(rating) AS DECIMAL(5,0)) as rating")->groupBy("user_tailor_id")->get();
-            // return ResponseFormatter::success($rating, "Rating berhasil dit");
-
-            $query = UserTailor::joinSub($rating, 'rating', function ($join) {
-                $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', "rating.total_review", 'user_tailor_details.id as profile_id');
+            $query = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id');
+            // return $query;
 
             if (!$req->has('all')) {
                 $query = $query->where('is_ready', 1);
@@ -169,8 +172,21 @@ class UserTailorController extends Controller
                     }
                 }
             }
-            $query = $paginate ? $query->paginate($paginate) : $query->get()->makeHidden(['created_at', 'updated_at']);
+            $query =  $query->get()->makeHidden(['created_at', 'updated_at']);
 
+            $query->each(function ($query) use ($rating) {
+                $tailorRating = $rating->where('user_tailor_id', $query->id)->first();
+                if ($tailorRating === null) {
+                    $query["rating"] = 0;
+                    $query["total_review"] = 0;
+                } else {
+                    collect($tailorRating)->keys()->map(function ($key) use ($tailorRating, $query) {
+                        if ($key != 'user_tailor_id') {
+                            $query[$key] = $tailorRating[$key];
+                        }
+                    });
+                }
+            });
 
             if ($query->count() <= 0) {
                 return ResponseFormatter::error(null, 'No Tailor found', 404);
@@ -248,15 +264,31 @@ class UserTailorController extends Controller
     public function show($uuid)
     {
         try {
-            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
-                ->groupBy('user_tailor_id');
+            // $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
+            //     ->groupBy('user_tailor_id');
 
-            $userTailor = UserTailor::joinSub($rating, 'rating', function ($join) {
-                $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
-            })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $uuid)->first();
+            // $userTailor = UserTailor::joinSub($rating, 'rating', function ($join) {
+            //     $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
+            // })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $uuid)->first();
+
+
+            $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $uuid)->first();
+
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
             // $userTailor = UserTailor::with('profile')->find($uuid);
             if (!$userTailor) {
                 return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+
+            if ($rating === null) {
+                $userTailor->rating = 0;
+                $userTailor->total_review = 0;
+            } else {
+                collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
+                    if ($key != 'user_tailor_id') {
+                        $userTailor->{$key} = $rating->{$key};
+                    }
+                });
             }
 
             $userTailor["availability"] = collect();

@@ -43,6 +43,43 @@ class UserTailorSeeder extends Seeder
             'province' => 'Banten',
             'zip_code' => '15158',
         ]);
+        UserTailor::create([
+            'email' => 'supertailor@gmail.com',
+            'password' => Hash::make("tailor123"),
+            'is_premium' => true,
+            'max_schedule_slot' => 5,
+        ])->profile()->create([
+            'first_name' => 'Super',
+            'last_name' => 'Tailor',
+            'phone_number' => '+639123456789',
+            'profile_picture' => asset("storage/" . $profiles->shift()),
+            'place_picture' => asset("storage/" . $places->random()),
+            'description' => 'Pelopor tailor pertama dan terbaik di Pekalongan, Jawa Tengah. Menyediakan jasa tailor jas, kebaya, kemeja, seragam, baju pesta, tunik, dress dan lain-lain.',
+            'address' => 'Jalan TB Simatupang, kel. Simatupang',
+            'district' => 'Simatupang',
+            'city' => 'Tangerang',
+            'province' => 'Banten',
+            'zip_code' => '15158',
+        ]);
+        UserTailor::create([
+            'email' => 'testTailor@gmail.com',
+            'password' => Hash::make("tailor123"),
+            'is_premium' => true,
+            'max_schedule_slot' => 5,
+        ])->profile()->create([
+            'first_name' => 'Test',
+            'last_name' => 'Tailor',
+            'phone_number' => '+639123456789',
+            'profile_picture' => asset("storage/" . $profiles->shift()),
+            'place_picture' => asset("storage/" . $places->random()),
+            'description' => 'Pelopor tailor pertama dan terbaik di Pekalongan, Jawa Tengah. Menyediakan jasa tailor jas, kebaya, kemeja, seragam, baju pesta, tunik, dress dan lain-lain.',
+            'address' => 'Jalan TB Simatupang, kel. Simatupang',
+            'district' => 'Simatupang',
+            'city' => 'Tangerang',
+            'province' => 'Banten',
+            'zip_code' => '15158',
+        ]);
+
         UserTailorFactory::new()->count($profiles->count())->create()->each(function ($userTailor) use ($profiles, $places) {
 
             if ($userTailor->is_premium) {

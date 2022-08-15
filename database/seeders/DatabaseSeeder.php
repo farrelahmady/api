@@ -19,6 +19,10 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => bcrypt('admin@123'),
         ]);
+        Admin::create([
+            'email' => 'testadmin@gmail.com',
+            'password' => bcrypt('admin@123'),
+        ]);
         $this->call(UserCustomerSeeder::class);
         $this->call(UserTailorSeeder::class);
         $this->call(ReviewSeeder::class);

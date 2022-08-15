@@ -26,6 +26,20 @@ class UserCustomerSeeder extends Seeder
         echo "Seeding UserCustomer...\n";
 
         UserCustomer::create([
+            'email' => 'testcustomer@gmail.com',
+            'password' => Hash::make("customer123"),
+        ])->profile()->create([
+            'first_name' => 'Tailorine',
+            'last_name' => 'Customer',
+            'phone_number' => '+639123456789',
+            'address' => 'Jalan TB Simatupang, kel. Simatupang',
+            'district' => 'Simatupang',
+            'city' => 'Tangerang',
+            'province' => 'Banten',
+            'zip_code' => '15158',
+            'profile_picture' => asset("storage/" . $files->shift()),
+        ]);
+        UserCustomer::create([
             'email' => 'customer@gmail.com',
             'password' => Hash::make("customer123"),
         ])->profile()->create([
