@@ -13,6 +13,7 @@ class AppointmentController extends Controller
 {
     public function store(Request $req)
     {
+        return ResponseFormatter::success($req->all(), 'Data berhasil ditambahkan');
         try {
             Carbon::setLocale('id');
 
