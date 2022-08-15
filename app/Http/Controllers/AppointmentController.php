@@ -21,7 +21,7 @@ class AppointmentController extends Controller
             $validator = Validator::make($req->all(), [
                 'user_tailor_id' => 'required|uuid|exists:user_tailors,uuid',
                 'date' => 'required|date',
-                'time' => 'required|date_format:H:i',
+                'time' => 'required|date_format:H:i:s',
                 'additional_message' => 'nullable|min:10',
             ]);
 
