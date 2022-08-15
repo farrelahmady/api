@@ -50,7 +50,7 @@ class UserTailorController extends Controller
                         $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
                     })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $user['uuid'])->first();
 
-                    return ResponseFormatter::success(["user Tailor" => $userTailor, "rating" => $rating, "user" => $user], 'Login Successful');
+                    return ResponseFormatter::success(["user Tailor" => $userTailor, "rating" => $rating->get(), "user" => $user], 'Login Successful');
 
 
                     return ResponseFormatter::success(
