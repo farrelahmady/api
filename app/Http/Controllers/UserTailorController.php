@@ -39,16 +39,23 @@ class UserTailorController extends Controller
                 }
 
                 if (Auth::guard('userTailor')->attempt(['email' => $request->email, 'password' => $request->password])) {
-                    $user = Auth::guard('userTailor')->user()->id;
-                    $user = UserTailor::with('profile')->find($user)->makeHidden(['created_at', 'updated_at']);
+                    $user = Auth::guard('userTailor')->user();
                     $user->tokens()->delete();
-                    $token =
-                        $user->createToken('authTailor')->plainTextToken;
+                    $token = $user->createToken('authTailor')->plainTextToken;
+
+                    $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))
+                        ->groupBy('user_tailor_id');
+
+                    $userTailor = UserTailor::joinSub($rating, 'rating', function ($join) {
+                        $join->on('user_tailors.id', '=', 'rating.user_tailor_id');
+                    })->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'rating.rating', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $user['uuid'])->first();
+
+
                     return ResponseFormatter::success(
                         [
                             'access_token' => $token,
                             'token_type' => 'Bearer',
-                            'user' => $user,
+                            'user' => $userTailor,
                         ],
                         'Login Successful'
                     );
@@ -219,8 +226,7 @@ class UserTailorController extends Controller
             $userTailor = UserTailor::with('profile')->find($userTailor)->makeHidden(['created_at', 'updated_at']);
 
             $userTailor->tokens()->delete();
-            $tokenResult =
-                $userTailor->createToken('authTailor')->plainTextToken;
+            $tokenResult = $userTailor->createToken('authTailor')->plainTextToken;
 
 
             return ResponseFormatter::success([

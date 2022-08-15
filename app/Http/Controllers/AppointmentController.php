@@ -16,8 +16,8 @@ class AppointmentController extends Controller
         try {
             Carbon::setLocale('id');
 
+            $user = auth('sanctum')->user();
             $validator = Validator::make($req->all(), [
-                'user_customer_id' => 'required|uuid|exists:user_customers,uuid',
                 'user_tailor_id' => 'required|uuid|exists:user_tailors,uuid',
                 'date' => 'required|date',
                 'time' => 'required|date_format:H:i',
@@ -35,6 +35,7 @@ class AppointmentController extends Controller
             }
 
             $data = $validator->validate();
+            $data['user_customer_id'] = $user->uuid;
 
             $dateTime = explode(
                 " ",
