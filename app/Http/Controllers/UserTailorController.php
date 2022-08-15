@@ -118,9 +118,7 @@ class UserTailorController extends Controller
                 $query = $query->where('is_ready', 1);
             }
 
-            if ($recommended) {
-                $query = $query->where('is_premium', 1)->orderByDesc('rating');
-            }
+
 
             if ($req->has('premium')) {
                 $premium = $premium == null || $premium >= 1 ? 1 : $premium;
@@ -157,21 +155,11 @@ class UserTailorController extends Controller
                         ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($address) . '%');
                 });
             }
-            if ($star) {
-                $query->where('rating', '>=', $star);
-            }
+
             if ($limit) {
                 $query = $query->take($limit);
             }
-            if ($sort) {
-                // return $order;
-                $sort = explode(',', $sort);
-                foreach ($sort as $s) {
-                    if (in_array($s, Schema::getColumnListing('user_tailor_details')) || in_array($s, Schema::getColumnListing('user_tailors')) || $s == 'rating') {
-                        $query = $query->orderBy($s, $order);
-                    }
-                }
-            }
+
             $query =  $query->get()->makeHidden(['created_at', 'updated_at']);
 
             $query->each(function ($query) use ($rating) {
@@ -187,6 +175,23 @@ class UserTailorController extends Controller
                     });
                 }
             });
+
+            if ($star) {
+                $query->where('rating', '>=', $star);
+            }
+
+            if ($recommended) {
+                $query = $query->where('is_premium', 1)->sortByDesc('rating');
+            }
+            if ($sort) {
+                // return $order;
+                $sort = explode(',', $sort);
+                foreach ($sort as $s) {
+                    if (in_array($s, Schema::getColumnListing('user_tailor_details')) || in_array($s, Schema::getColumnListing('user_tailors')) || $s == 'rating') {
+                        $query = $query->sortBy($s, $order);
+                    }
+                }
+            }
 
             if ($query->count() <= 0) {
                 return ResponseFormatter::error(null, 'No Tailor found', 404);
