@@ -32,6 +32,7 @@ Route::controller(UserTailorController::class)->group(function () {
     Route::get('/tailor/{uuid}', 'show');
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/tailor/auth/check', 'authCheck')->name('tailor.auth.check');
         Route::post('/tailor/logout', 'logout')->name('tailor.logout');
         Route::put('/tailor/{uuid}', 'update');
         Route::delete('/tailor/{uuid}', 'destroy');

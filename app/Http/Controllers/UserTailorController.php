@@ -16,6 +16,23 @@ use Illuminate\Validation\Rules\Password as RulesPassword;
 
 class UserTailorController extends Controller
 {
+    public function authCheck(Request $req)
+    {
+        try {
+            $user = Auth::guard("sanctum")->user();
+            if ($user && in_array($user->uuid, UserTailor::all()->pluck("uuid")->toArray())) {
+                return ResponseFormatter::success([
+                    "access_token" => $req->bearerToken(),
+                    "token_type" => "Bearer",
+                    "user" => $user
+                ]);
+            } else {
+                return ResponseFormatter::error('Anda Belum Login', 401);
+            }
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
+    }
     public function login(Request $request)
     {
         try {

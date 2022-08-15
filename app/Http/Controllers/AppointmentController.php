@@ -20,7 +20,7 @@ class AppointmentController extends Controller
             $validator = Validator::make($req->all(), [
                 'user_tailor_id' => 'required|uuid|exists:user_tailors,uuid',
                 'date' => 'required|date',
-                'time' => 'required|date_format:H:i',
+                'time' => 'required|date_format:H:i:s',
                 'additional_message' => 'nullable|min:10',
             ]);
 
@@ -29,7 +29,7 @@ class AppointmentController extends Controller
             if ($validator->fails()) {
                 return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
             }
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i', $req->date . " " . $req->time)->format("Y-m-d H:i:s");
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $req->date . " " . $req->time)->format("Y-m-d H:i:s");
             if ($dateTime < Carbon::now()->format("Y-m-d H:i:s")) {
                 return ResponseFormatter::error(["message" => "Tanggal dan Waktu yang dipilih telah dilewati dari tanggal dan waktu sekarang"], 'Bad Request', 400);
             }
