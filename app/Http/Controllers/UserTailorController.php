@@ -181,7 +181,7 @@ class UserTailorController extends Controller
             }
 
             if ($recommended) {
-                $query = $query->where('is_premium', 1)->sortByDesc('rating');
+                $query = $query->where('is_premium', 1)->sortByDesc('rating')->values();
             }
             if ($sort) {
                 // return $order;
