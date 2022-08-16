@@ -35,6 +35,7 @@ Route::controller(UserTailorController::class)->group(function () {
         Route::post('/tailor/auth/check', 'authCheck')->name('tailor.auth.check');
         Route::post('/tailor/logout', 'logout')->name('tailor.logout');
         Route::put('/tailor/{uuid}', 'update');
+        Route::post('/tailor/picture', 'updatePicture');
         Route::delete('/tailor/{uuid}', 'destroy');
     });
 });

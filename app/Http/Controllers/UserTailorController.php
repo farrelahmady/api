@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\UserTailorDetail;
 use Illuminate\Validation\Rules\Password as RulesPassword;
@@ -358,5 +361,72 @@ class UserTailorController extends Controller
     public function destroy(UserTailor $userTailor)
     {
         //
+    }
+
+    public function updatePicture(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'profile_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
+                'place_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
+            ]);
+
+            if ($validator->fails()) {
+                return ResponseFormatter::error([
+                    'message' => 'Data tidak valid',
+                    'error' => $validator->errors()
+                ], 'Data tidak valid', 422);
+            }
+            $userTailor = UserTailor::find($req->user()->id);
+
+            if ($userTailor == null) {
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+
+            if (!$req->hasFile('profile_picture') && !$req->hasFile('place_picture')) {
+                return ResponseFormatter::error(null, 'File tidak ditemukan', 404);
+            }
+
+            $message = "";
+            if ($req->hasFile('profile_picture') && $req->file('profile_picture')->isValid()) {
+                if ($userTailor->profile->profile_picture) {
+
+                    $path = substr($userTailor->profile->profile_picture, strpos($userTailor->profile->profile_picture, 'images'));
+                    Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+                }
+
+                $fileName = "tlr-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('profile_picture')->getClientOriginalExtension();
+                $profilePicture = asset('storage/' . $req->file('profile_picture')->storeAs('images/tailor/profile', $fileName, "public"));
+                // return ;
+                if (!Storage::disk('public')->exists(substr($profilePicture, strpos($profilePicture, 'images')))) {
+                    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
+                }
+                $userTailor->profile->profile_picture = $profilePicture;
+                $message .= " Foto Profil ";
+            }
+
+            if ($req->hasFile('place_picture') && $req->file('place_picture')->isValid()) {
+                if ($userTailor->profile->place_picture) {
+
+                    $path = substr($userTailor->profile->place_picture, strpos($userTailor->profile->place_picture, 'images'));
+                    Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+                }
+
+                $fileName = "plc-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('place_picture')->getClientOriginalExtension();
+                $placePicture = asset('storage/' . $req->file('place_picture')->storeAs('images/tailor/place', $fileName, "public"));
+                // return ;
+                if (!Storage::disk('public')->exists(substr($placePicture, strpos($placePicture, 'images')))) {
+                    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
+                }
+                $userTailor->profile->place_picture = $placePicture;
+                $message .= " Foto Lokasi ";
+            }
+
+            $userTailor->save();
+
+            return ResponseFormatter::success($userTailor, "$message" . "berhasil diubah");
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
+        }
     }
 }
