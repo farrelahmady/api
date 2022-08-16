@@ -43,7 +43,7 @@ class UserCustomerController extends Controller
                 if (Auth::guard('userCustomer')->attempt(['email' => $request->email, 'password' => $request->password])) {
                     $user = Auth::guard('userCustomer')->user()->id;
                     $user = UserCustomer::with('profile')->find($user)->makeHidden(['created_at', 'updated_at']);
-                    $user->tokens()->delete();
+                    // $user->tokens()->delete();
                     $token = $user->createToken('authCustomer')->plainTextToken;
                     return ResponseFormatter::success(
                         [
@@ -182,7 +182,7 @@ class UserCustomerController extends Controller
 
             $userCustomer = UserCustomer::with('profile')->find($userCustomer)->makeHidden(['created_at', 'updated_at']);
 
-            $userCustomer->tokens()->delete();
+            // $userCustomer->tokens()->delete();
             $tokenResult = $userCustomer->createToken('authCustomer')->plainTextToken;
 
 

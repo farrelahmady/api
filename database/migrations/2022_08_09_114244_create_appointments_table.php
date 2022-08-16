@@ -26,6 +26,7 @@ return new class extends Migration
         });
 
         if (env('DB_CONNECTION') === 'mysql') {
+            echo "Creating Event Scheduler for MySQL\n";
             DB::statement('DROP EVENT IF EXISTS appointments_status_update_scheduler');
             DB::statement('CREATE EVENT appointments_status_update_scheduler ON SCHEDULE EVERY 1 MINUTE
                         STARTS DATE_FORMAT(CURRENT_TIMESTAMP, \'%Y-%m-%d %H:%i\') + INTERVAL 1 MINUTE

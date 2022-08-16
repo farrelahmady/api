@@ -30,7 +30,7 @@ class AdminController extends Controller
                 return ResponseFormatter::error(null, "Invalid credentials", 401);
             }
             $user = Auth::guard('admin')->user();
-            $user->tokens()->delete();
+            // $user->tokens()->delete();
             $token = $user->createToken('admin')->plainTextToken;
             // $loginKey = collect(session()->all())->keys()->filter(fn ($file) => strpos($file, 'login_admin') !== false)->values()->implode("");
             return ResponseFormatter::success(
