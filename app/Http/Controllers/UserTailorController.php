@@ -352,17 +352,6 @@ class UserTailorController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\UserTailor  $userTailor
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(UserTailor $userTailor)
-    {
-        //
-    }
-
     public function updatePicture(Request $req)
     {
         try {
@@ -377,7 +366,8 @@ class UserTailorController extends Controller
                     'error' => $validator->errors()
                 ], 'Data tidak valid', 422);
             }
-            $userTailor = UserTailor::find($req->user()->id);
+            $id = $req->user()->id;
+            $userTailor = UserTailor::find($id);
 
             if ($userTailor == null) {
                 return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
@@ -422,9 +412,73 @@ class UserTailorController extends Controller
                 $message .= " Foto Lokasi ";
             }
 
-            $userTailor->save();
+            $userTailor->profile->save();
 
+            $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.id', $id)->first();
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
+
+            if ($rating === null) {
+                $userTailor->rating = 0;
+                $userTailor->total_review = 0;
+            } else {
+                collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
+                    if ($key != 'user_tailor_id') {
+                        $userTailor->{$key} = $rating->{$key};
+                    }
+                });
+            }
             return ResponseFormatter::success($userTailor, "$message" . "berhasil diubah");
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\UserTailor  $userTailor
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(UserTailor $userTailor)
+    {
+        //
+    }
+
+    public function deletePicture($field)
+    {
+        try {
+            if ($field != 'profile_picture' && $field != 'place_picture') {
+                return ResponseFormatter::error(null, 'Field tidak ditemukan', 404);
+            }
+            $id = Auth::guard('sanctum')->user()->id;
+            $userTailor = UserTailor::find($id);
+
+            if ($userTailor == null) {
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+
+            if ($userTailor->profile->$field) {
+                $path = substr($userTailor->profile->$field, strpos($userTailor->profile->$field, 'images'));
+                Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+                $userTailor->profile->$field = null;
+                $userTailor->profile->save();
+                // $userTailor->profile = UserTailorDetail::where('user_tailor_id', $userTailor->id)->update([$field => null]);
+            }
+
+            $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.id', $id)->first();
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
+
+            if ($rating === null) {
+                $userTailor->rating = 0;
+                $userTailor->total_review = 0;
+            } else {
+                collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
+                    if ($key != 'user_tailor_id') {
+                        $userTailor->{$key} = $rating->{$key};
+                    }
+                });
+            }
+            return ResponseFormatter::success($userTailor, "Foto berhasil dihapus");
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
         }

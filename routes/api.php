@@ -37,6 +37,7 @@ Route::controller(UserTailorController::class)->group(function () {
         Route::put('/tailor/{uuid}', 'update');
         Route::post('/tailor/picture', 'updatePicture');
         Route::delete('/tailor/{uuid}', 'destroy');
+        Route::delete('/tailor/picture/{field}', 'deletePicture');
     });
 });
 
