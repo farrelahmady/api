@@ -24,16 +24,6 @@ return new class extends Migration
             $table->enum('status', [1, 2, 3, 4, 5])->default(1);
             $table->timestamps();
         });
-
-        if (env('DB_CONNECTION') === 'mysql') {
-            echo "Creating Event Scheduler for MySQL\n";
-            DB::statement('DROP EVENT IF EXISTS appointments_status_update_scheduler');
-            DB::statement('CREATE EVENT appointments_status_update_scheduler ON SCHEDULE EVERY 1 MINUTE
-                        STARTS DATE_FORMAT(CURRENT_TIMESTAMP, \'%Y-%m-%d %H:%i\') + INTERVAL 1 MINUTE
-                        DO
-                        UPDATE appointments SET status = 3 WHERE status = 2 AND CURDATE() >= date  AND CURRENT_TIME() >= time ');
-            # code...
-        }
     }
 
     /**
