@@ -190,7 +190,7 @@ class UserTailorController extends Controller
             } else {
                collect($tailorRating)->keys()->map(function ($key) use ($tailorRating, $query) {
                   if ($key != 'user_tailor_id') {
-                     $query[$key] = $tailorRating[$key];
+                     $query[$key] = (int) $tailorRating[$key];
                   }
                });
             }
@@ -311,7 +311,7 @@ class UserTailorController extends Controller
          } else {
             collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
                if ($key != 'user_tailor_id') {
-                  $userTailor->{$key} = $rating->{$key};
+                  $userTailor->{$key} = (int)$rating->{$key};
                }
             });
          }
@@ -423,7 +423,7 @@ class UserTailorController extends Controller
          } else {
             collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
                if ($key != 'user_tailor_id') {
-                  $userTailor->{$key} = $rating->{$key};
+                  $userTailor->{$key} = (int) $rating->{$key};
                }
             });
          }
@@ -480,7 +480,7 @@ class UserTailorController extends Controller
          } else {
             collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
                if ($key != 'user_tailor_id') {
-                  $userTailor->{$key} = $rating->{$key};
+                  $userTailor->{$key} = (int) $rating->{$key};
                }
             });
          }
