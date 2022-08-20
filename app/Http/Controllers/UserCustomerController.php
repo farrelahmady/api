@@ -205,7 +205,7 @@ class UserCustomerController extends Controller
     public function show($uuid)
     {
         try {
-            $userCustomer = UserCustomer::with('profile')->where('uuid', $uuid)->first();
+            $userCustomer = UserCustomer::withTrashed()->with('profile')->where('uuid', $uuid)->first();
             if (!$userCustomer) {
                 return ResponseFormatter::error(null, 'User Customer tidak ditemukan', 404);
             }

@@ -32,9 +32,6 @@ class UserTailor extends Authenticatable
         'id',
         'password',
         'is_admin',
-        'created_at',
-        'updated_at',
-        'deleted_at',
     ];
 
     public function profile()

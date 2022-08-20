@@ -21,7 +21,6 @@ class UserCustomer extends Authenticatable
     protected $hidden = [
         'id',
         'password',
-        'deleted_at',
     ];
 
     public function profile()
