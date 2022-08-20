@@ -306,7 +306,7 @@ class UserCustomerController extends Controller
             $userCustomer->profile->delete();
             $userCustomer->tokens()->delete();
 
-            return ResponseFormatter::success(null, 'User Customer berhasil dihapus');
+            return ResponseFormatter::success(null, 'User Customer berhasil di non aktifkan');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
         }
@@ -349,7 +349,7 @@ class UserCustomerController extends Controller
             }
             $userCustomer->restore();
             $userCustomer = UserCustomer::with('profile')->find($userCustomer->id)->makeHidden(['created_at', 'updated_at']);
-            return ResponseFormatter::success($userCustomer, 'User Customer berhasil direstore');
+            return ResponseFormatter::success($userCustomer, 'User Customer berhasil di aktifkan');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
         }
