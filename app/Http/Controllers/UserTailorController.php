@@ -388,9 +388,9 @@ class UserTailorController extends Controller
                 $fileName = "tlr-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('profile_picture')->getClientOriginalExtension();
                 $profilePicture = asset('storage/' . $req->file('profile_picture')->storeAs('images/tailor/profile', $fileName, "public"));
                 // return ;
-                if (!Storage::disk('public')->exists(substr($profilePicture, strpos($profilePicture, 'images')))) {
-                    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
-                }
+                //if (!Storage::disk('public')->exists(substr($profilePicture, strpos($profilePicture, 'images')))) {
+                //    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
+                //}
                 $userTailor->profile->profile_picture = $profilePicture;
                 $message .= " Foto Profil ";
             }
@@ -405,9 +405,9 @@ class UserTailorController extends Controller
                 $fileName = "plc-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('place_picture')->getClientOriginalExtension();
                 $placePicture = asset('storage/' . $req->file('place_picture')->storeAs('images/tailor/place', $fileName, "public"));
                 // return ;
-                if (!Storage::disk('public')->exists(substr($placePicture, strpos($placePicture, 'images')))) {
-                    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
-                }
+                //if (!Storage::disk('public')->exists(substr($placePicture, strpos($placePicture, 'images')))) {
+                //    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
+                //}
                 $userTailor->profile->place_picture = $placePicture;
                 $message .= " Foto Lokasi ";
             }
