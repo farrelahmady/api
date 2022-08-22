@@ -262,9 +262,9 @@ class UserCustomerController extends Controller
                     Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
                 }
                 # code...
-                dd($request->file('profile_picture'));
                 $fileName = "cust-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $request->file('profile_picture')->getClientOriginalExtension();
                 $profilePicture = asset('storage/' . $request->file('profile_picture')->storeAs('images/customer/profile', $fileName, "public"));
+                dd([$profilePicture, $fileName]);
                 // return ;
                 //if (!Storage::disk('public')->exists(substr($profilePicture, strpos($profilePicture, 'images')))) {
                 //    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
