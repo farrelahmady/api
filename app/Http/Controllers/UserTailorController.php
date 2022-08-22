@@ -347,9 +347,85 @@ class UserTailorController extends Controller
      * @param  \App\Models\UserTailor  $userTailor
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserTailor $userTailor)
+    public function update(Request $request, $uuid)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'old_password' => [RulesPassword::min(8)->numbers()->letters()],
+                'password' => ["string", "confirmed",  RulesPassword::min(8)->numbers()->letters()],
+                'password_confirmation'  => ['required_with:password', "string", 'same:password',],
+                'first_name' => ['nullable', 'string', 'min:3', 'max:255'],
+                'last_name' => ['nullable', 'string', 'min:3', 'max:255'],
+                'description' => ['nullable', 'string', 'min:3', 'max:350'],
+                'address' => ['nullable', 'string', 'max:255'],
+                'district' => ['nullable', 'string', 'max:255'],
+                'city' => ['nullable', 'string', 'max:255'],
+                'province' => ['nullable', 'string', 'max:255'],
+                'zip_code' => ['nullable', 'numeric', 'digits:5'],
+            ]);
+
+            if ($validator->fails()) {
+                return ResponseFormatter::error(
+                    $validator->errors(),
+                    'Terjadi kesalahan saat validasi data',
+                    422
+                );
+            }
+
+            $userTailor = UserTailor::where('uuid', $uuid)->first();
+
+            if ($userTailor == null) {
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+
+            if ($request->old_password) {
+                if (!Hash::check($request->old_password, $userTailor->password)) {
+                    return ResponseFormatter::error(null, 'Password lama tidak sesuai', 422);
+                }
+            }
+
+            if ($request->password) {
+                $userTailor->password = Hash::make($request->password);
+            }
+
+            if ($request->first_name) {
+                $userTailor->profile->first_name = $request->first_name;
+            }
+
+            if ($request->last_name) {
+                $userTailor->profile->last_name = $request->last_name;
+            }
+
+            if ($request->description) {
+                $userTailor->profile->description = $request->description;
+            }
+
+            if ($request->address) {
+                $userTailor->profile->address = $request->address;
+            }
+
+            if ($request->district) {
+                $userTailor->profile->district = $request->district;
+            }
+
+            if ($request->city) {
+                $userTailor->profile->city = $request->city;
+            }
+
+            if ($request->province) {
+                $userTailor->profile->province = $request->province;
+            }
+
+            if ($request->zip_code) {
+                $userTailor->profile->zip_code = $request->zip_code;
+            }
+
+            $userTailor->profile->save();
+
+            return ResponseFormatter::success($userTailor, 'User Tailor berhasil diperbarui');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan', 500);
+        }
     }
 
     public function updatePicture(Request $req)

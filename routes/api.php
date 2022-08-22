@@ -34,7 +34,7 @@ Route::controller(UserTailorController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/tailor/auth/check', 'authCheck')->name('tailor.auth.check');
         Route::post('/tailor/logout', 'logout')->name('tailor.logout');
-        Route::put('/tailor/{uuid}', 'update');
+        Route::post('/tailor/{uuid}', 'update');
         Route::post('/tailor/picture', 'updatePicture');
         Route::delete('/tailor/{uuid}', 'destroy');
         Route::delete('/tailor/picture/{field}', 'deletePicture');
@@ -81,8 +81,10 @@ Route::controller(AvailabilityController::class)->group(function () {
 });
 
 Route::controller(AppointmentController::class)->group(function () {
-    Route::post('/appointment', 'store')->middleware('auth:sanctum');
-    // Route::get('/appointment', 'index');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/appointment', 'store')->middleware('auth:sanctum');
+        Route::get('/appointment', 'index');
+    });
     // Route::get('/appointment/{uuid}', 'show');
     // Route::put('/appointment/{uuid}', 'update');
     // Route::delete('/appointment/{uuid}', 'destroy');

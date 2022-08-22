@@ -8,9 +8,61 @@ use App\Helpers\ResponseFormatter;
 use App\Models\Operational\Appointment;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\Availability;
+use App\Models\User\Admin;
+use App\Models\User\UserTailor;
 
 class AppointmentController extends Controller
 {
+    public function index(Request $req)
+    {
+        $data = Appointment::with(['tailor.profile', 'customer.profile'])->where("user_tailor_id", auth('sanctum')->user()['uuid'])->orWhere("user_customer_id", auth('sanctum')->user()['uuid']);
+
+        $admin = Admin::where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email']);
+        if ($admin->count() > 0) {
+            $data = Appointment::with(['tailor.profile', 'customer.profile']);
+
+            if ($req->has('customer')) {
+                $data = $data->where('user_customer_id', $req->customer);
+            }
+        };
+
+        if ($req->has('status')) {
+            $data = $data->where('status', $req->status);
+        }
+
+        if ($req->has('date')) {
+            $data = $data->where('date', $req->date);
+        }
+
+        if ($req->has('before')) {
+            $data = $data->where('date', '<', Carbon::parse($req->before));
+        }
+
+        if ($req->has('after')) {
+            $data = $data->where('date', '>', Carbon::parse($req->after));
+        }
+
+        if ($req->has('time')) {
+            $data = $data->where('time', $req->time);
+        }
+
+
+
+        $data = $data->get()->each(function ($item) {
+
+            //$item->date = Carbon::parse($item->date)->settings(['formatFunction' => 'translatedFormat'])->format('l, d F Y');
+            //$item->status = (int)$item->status;
+        });
+        //$data = Appointment::all()->each(function ($item) {
+        //    $item->tailor->profile;
+        //    $item->customer->profile;
+        //});
+
+        return ResponseFormatter::success(
+            $data,
+            $data->count() . ' Data retrieved successfully'
+        );
+    }
     public function store(Request $req)
     {
         // return ResponseFormatter::success($req->all(), 'Data berhasil ditambahkan');

@@ -2,9 +2,11 @@
 
 namespace App\Models\Operational;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User\UserTailor;
+use App\Models\User\UserCustomer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Appointment extends Model
 {
@@ -13,4 +15,14 @@ class Appointment extends Model
     protected $table = 'appointments';
 
     protected $guarded = ['id'];
+
+    public function tailor()
+    {
+        return $this->belongsTo(UserTailor::class, 'user_tailor_id', 'uuid');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(UserCustomer::class, 'user_customer_id', 'uuid');
+    }
 }
