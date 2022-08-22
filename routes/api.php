@@ -82,7 +82,7 @@ Route::controller(AvailabilityController::class)->group(function () {
 
 Route::controller(AppointmentController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/appointment', 'store')->middleware('auth:sanctum');
+        Route::post('/appointment', 'store');
         Route::get('/appointment', 'index');
     });
     // Route::get('/appointment/{uuid}', 'show');
