@@ -96,7 +96,7 @@ Route::post('/image/upload', function (Request $req) {
     try {
         $file = $req->file('file');
         $filename = Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $file->getClientOriginalExtension();
-        $path = asset("storage/" . $file->storePubliclyAs('images/customer/profile/', $filename, 'public'));
+        $path = asset("storage/" . $file->storePubliclyAs('images/customer', $filename, 'public'));
         return response()->json(['path' => $path]);
         //code...
     } catch (\Exception $e) {
