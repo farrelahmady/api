@@ -18,7 +18,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('email')->unique();
             $table->string('password');
-            $table->smallInteger('max_schedule_slot')->default(3);
+            $table->enum('max_schedule_slot', [0, 5])->default(0);
             $table->unsignedBigInteger('transaction_id')->nullable();
             $table->boolean('is_premium')->default(false);
             $table->boolean('is_ready')->default(false);

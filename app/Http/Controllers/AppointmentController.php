@@ -14,122 +14,131 @@ use App\Models\ManagementAccess\Availability;
 
 class AppointmentController extends Controller
 {
-   public function index(Request $req)
-   {
-      try {
-         $admin = Admin::where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
-         $tailor = UserTailor::withTrashed()->where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
-         $customer = UserCustomer::withTrashed()->where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
-         if ($admin) {
-            $data = Appointment::with(['tailor.profile', 'customer.profile']);
+    public function index(Request $req)
+    {
+        try {
+            $admin = Admin::where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
+            $tailor = UserTailor::withTrashed()->where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
+            $customer = UserCustomer::withTrashed()->where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
+            if ($admin) {
+                $data = Appointment::with(['tailor.profile', 'customer.profile']);
 
-            if ($req->has('customer')) {
-               $data = $data->where('user_customer_id', $req->customer);
+                if ($req->has('customer')) {
+                    $data = $data->where('user_customer_id', $req->customer);
+                }
+            } else if ($tailor) {
+                $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('user_tailor_id', auth('sanctum')->user()['uuid']);
+            } else if ($customer) {
+                $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('user_customer_id', auth('sanctum')->user()['uuid']);
             }
-         } else if ($tailor) {
-            $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('user_tailor_id', auth('sanctum')->user()['uuid']);
-         } else if ($customer) {
-            $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('user_customer_id', auth('sanctum')->user()['uuid']);
-         }
 
 
 
-         if ($req->has('status')) {
-            $data = $data->where('status', $req->status);
-         }
+            if ($req->has('status')) {
+                $data = $data->where('status', $req->status);
+            }
 
-         if ($req->has('date')) {
-            $data = $data->where('date', $req->date);
-         }
+            if ($req->has('date')) {
+                $data = $data->where('date', $req->date);
+            }
 
-         if ($req->has('before')) {
-            $data = $data->where('date', '<', Carbon::parse($req->before));
-         }
+            if ($req->has('before')) {
+                $data = $data->where('date', '<', Carbon::parse($req->before));
+            }
 
-         if ($req->has('after')) {
-            $data = $data->where('date', '>', Carbon::parse($req->after));
-         }
+            if ($req->has('after')) {
+                $data = $data->where('date', '>', Carbon::parse($req->after));
+            }
 
-         if ($req->has('time')) {
-            $data = $data->where('time', $req->time);
-         }
-
-
-
-         $data = $data->get()->each(function ($item) {
-
-            $item->date = Carbon::parse($item->date)->settings(['formatFunction' => 'translatedFormat'])->format('l, d F Y');
-            $item->status = (int)$item->status;
-         });
-         //$data = Appointment::all()->each(function ($item) {
-         //    $item->tailor->profile;
-         //    $item->customer->profile;
-         //});
-
-         return ResponseFormatter::success(
-            $data,
-            $data->count() . ' Data retrieved successfully'
-         );
-      } catch (\Exception $e) {
-         return ResponseFormatter::error(data: $e->getMessage(), message: 'Something Went Wrong', code: 500);
-      }
-   }
-   public function store(Request $req)
-   {
-      // return ResponseFormatter::success($req->all(), 'Data berhasil ditambahkan');
-      try {
-         Carbon::setLocale('id');
-
-         $user = auth('sanctum')->user();
-         $validator = Validator::make($req->all(), [
-            'user_tailor_id' => 'required|uuid|exists:user_tailors,uuid',
-            'date' => 'required|date',
-            'time' => 'required|date_format:H:i:s',
-            'additional_message' => 'nullable|min:10',
-         ]);
+            if ($req->has('time')) {
+                $data = $data->where('time', $req->time);
+            }
 
 
 
-         if ($validator->fails()) {
-            return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
-         }
-         $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $req->date . " " . $req->time)->format("Y-m-d H:i:s");
-         if ($dateTime < Carbon::now()->format("Y-m-d H:i:s")) {
-            return ResponseFormatter::error(["message" => "Tanggal dan Waktu yang dipilih telah dilewati dari tanggal dan waktu sekarang"], 'Bad Request', 400);
-         }
+            $data = $data->get()->each(function ($item) {
 
-         $data = $validator->validate();
-         $data['user_customer_id'] = $user->uuid;
+                $item->date = Carbon::parse($item->date)->settings(['formatFunction' => 'translatedFormat'])->format('l, d F Y');
+                $item->status = (int)$item->status;
+            });
+            //$data = Appointment::all()->each(function ($item) {
+            //    $item->tailor->profile;
+            //    $item->customer->profile;
+            //});
 
-         $dateTime = explode(
-            " ",
-            $dateTime
-         );
-         $data['date'] = $dateTime[0];
-         $data['time'] = $dateTime[1];
-         // return $data;
+            return ResponseFormatter::success(
+                $data,
+                $data->count() . ' Data retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return ResponseFormatter::error(data: $e->getMessage(), message: 'Something Went Wrong', code: 500);
+        }
+    }
+    public function store(Request $req)
+    {
+        // return ResponseFormatter::success($req->all(), 'Data berhasil ditambahkan');
+        try {
+            Carbon::setLocale('id');
 
-         $availability = Availability::where('user_tailor_id', $req->user_tailor_id)->where('date', $data['date'])->where('time', $data['time'])->get();
-         $appointment = Appointment::where('user_tailor_id', $req->user_tailor_id)->where('date', $data['date'])->where('time', $data['time'])->get();
-
-         $custAppointment = Appointment::where('user_customer_id', $req->user_customer_id)->where('date', $data['date'])->where('time', $data['time'])->get();
-         // return $custAppointment->count() >= 0;
-         if ($availability->count() <= 0 || $appointment->count() > 0) {
-            return ResponseFormatter::error(["message" => "Jadwal janji temu tidak tersedia"], 'Forbidden', 403);
-         } else if ($custAppointment->count() > 0) {
-            return ResponseFormatter::error(["message" => "Anda telah membuat janji temu di jam yang sama"], 'Forbidden', 403);
-         }
+            $user = auth('sanctum')->user();
+            $validator = Validator::make($req->all(), [
+                'user_tailor_id' => 'required|uuid|exists:user_tailors,uuid',
+                'date' => 'required|date',
+                'time' => 'required|date_format:H:i:s',
+                'additional_message' => 'nullable|min:10',
+            ]);
 
 
 
+            if ($validator->fails()) {
+                return ResponseFormatter::error($validator->errors(), 'Masukan Tidak Valid', 422);
+            }
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $req->date . " " . $req->time)->format("Y-m-d H:i:s");
+            if ($dateTime < Carbon::now()->format("Y-m-d H:i:s")) {
+                return ResponseFormatter::error(["message" => "Tanggal dan Waktu yang dipilih telah dilewati dari tanggal dan waktu sekarang"], 'Bad Request', 400);
+            }
+
+            $tailor = UserTailor::where('uuid', $req->user_tailor_id)->first();
+            if (!$tailor) {
+                return ResponseFormatter::error(["message" => "Tailor tidak ditemukan"], 'Not Found', 404);
+            }
+
+            if (!$tailor->is_premium) {
+                return ResponseFormatter::error(["message" => "Tailor belum menjadi premium"], 'Forbidden', 402);
+            }
+
+            $data = $validator->validate();
+            $data['user_customer_id'] = $user->uuid;
+
+            $dateTime = explode(
+                " ",
+                $dateTime
+            );
+            $data['date'] = $dateTime[0];
+            $data['time'] = $dateTime[1];
+            // return $data;
+
+            $availability = Availability::where('user_tailor_id', $req->user_tailor_id)->where('date', $data['date'])->where('time', $data['time'])->get();
+            $appointment = Appointment::where('user_tailor_id', $req->user_tailor_id)->where('date', $data['date'])->where('time', $data['time'])->get();
+
+            $custAppointment = Appointment::where('user_customer_id', $req->user_customer_id)->where('date', $data['date'])->where('time', $data['time'])->get();
+            // return $custAppointment->count() >= 0;
+            if ($availability->count() <= 0 || $appointment->count() > 0) {
+                return ResponseFormatter::error(["message" => "Jadwal janji temu tidak tersedia"], 'Forbidden', 403);
+            } else if ($custAppointment->count() > 0) {
+                return ResponseFormatter::error(["message" => "Anda telah membuat janji temu di jam yang sama"], 'Forbidden', 403);
+            }
 
 
-         // return $data;
 
-         $appointment = Appointment::create($data);
-         return ResponseFormatter::success($appointment, 'Berhasil membuat appointment');
-      } catch (\Exception $e) {
-         return ResponseFormatter::error(message: $e->getMessage(), code: 500);
-      }
-   }
+
+
+            // return $data;
+
+            $appointment = Appointment::create($data);
+            return ResponseFormatter::success($appointment, 'Berhasil membuat appointment');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error(message: $e->getMessage(), code: 500);
+        }
+    }
 }
