@@ -89,3 +89,14 @@ Route::controller(AppointmentController::class)->group(function () {
     // Route::put('/appointment/{uuid}', 'update');
     // Route::delete('/appointment/{uuid}', 'destroy');
 });
+
+Route::post('/image/upload', function (Request $req) {
+    try {
+        $file = $req->file('file');
+        $path = $file->store('public/dummy');
+        return response()->json(['path' => $path]);
+        //code...
+    } catch (\Exception $e) {
+        response()->json(['message' => $e->getMessage()], 500);
+    }
+});
