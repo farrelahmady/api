@@ -1,13 +1,15 @@
 <?php
 
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\PasswordController;
 use App\Models\ManagementAccess\Availability;
 use App\Http\Controllers\UserTailorController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\UserCustomerController;
 
@@ -93,7 +95,8 @@ Route::controller(AppointmentController::class)->group(function () {
 Route::post('/image/upload', function (Request $req) {
     try {
         $file = $req->file('file');
-        $path = $file->store('public/dummy');
+        $filename = Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $file->getClientOriginalExtension();
+        $path = asset('storage/' . $file->storeAs('images/tailor/place', $filename, "public"));
         return response()->json(['path' => $path]);
         //code...
     } catch (\Exception $e) {
