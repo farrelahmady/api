@@ -442,8 +442,8 @@ class UserTailorController extends Controller
                     'error' => $validator->errors()
                 ], 'Data tidak valid', 422);
             }
-            $id = $req->user()->id;
-            $userTailor = UserTailor::find($id);
+            $uuid = $req->user()->uuid;
+            $userTailor = UserTailor::where('uuid', $uuid);
 
             if ($userTailor == null) {
                 return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
