@@ -428,7 +428,7 @@ class UserTailorController extends Controller
         }
     }
 
-    public function updatePicture(Request $req)
+    public function updatePicture(Request $req, $field)
     {
         try {
             $validator = Validator::make($req->all(), [
@@ -442,19 +442,19 @@ class UserTailorController extends Controller
                     'error' => $validator->errors()
                 ], 'Data tidak valid', 422);
             }
-            $uuid = $req->user('sanctum')->uuid;
-            $userTailor = UserTailor::where('uuid', $uuid);
+            $id = auth('sanctum')->user()->id;
+            $userTailor = UserTailor::find($id);
 
-            if ($userTailor == null) {
-                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
-            }
+            //if ($userTailor == null) {
+            //    return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            //}
 
             if (!$req->hasFile('profile_picture') && !$req->hasFile('place_picture')) {
                 return ResponseFormatter::error(null, 'File tidak ditemukan', 404);
             }
 
             $message = "";
-            if ($req->hasFile('profile_picture') && $req->file('profile_picture')->isValid()) {
+            if ($req->hasFile('profile_picture') && $req->file('profile_picture')->isValid() && $field == "profile_picture") {
                 if ($userTailor->profile->profile_picture) {
 
                     $path = substr($userTailor->profile->profile_picture, strpos($userTailor->profile->profile_picture, 'images'));
@@ -471,7 +471,7 @@ class UserTailorController extends Controller
                 $message .= " Foto Profil ";
             }
 
-            if ($req->hasFile('place_picture') && $req->file('place_picture')->isValid()) {
+            if ($req->hasFile('place_picture') && $req->file('place_picture')->isValid() && $field == "place_picture") {
                 if ($userTailor->profile->place_picture) {
 
                     $path = substr($userTailor->profile->place_picture, strpos($userTailor->profile->place_picture, 'images'));

@@ -37,7 +37,7 @@ Route::controller(UserTailorController::class)->group(function () {
         Route::post('/tailor/auth/check', 'authCheck')->name('tailor.auth.check');
         Route::post('/tailor/logout', 'logout')->name('tailor.logout');
         Route::post('/tailor/{uuid}', 'update');
-        Route::post('/tailor/picture', 'updatePicture');
+        Route::post('/tailor/picture/{field}', 'updatePicture');
         Route::delete('/tailor/{uuid}', 'destroy');
         Route::delete('/tailor/picture/{field}', 'deletePicture');
     });
@@ -92,14 +92,14 @@ Route::controller(AppointmentController::class)->group(function () {
     // Route::delete('/appointment/{uuid}', 'destroy');
 });
 
-Route::post('/image/upload', function (Request $req) {
-    try {
-        $file = $req->file('file');
-        $filename = Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $file->getClientOriginalExtension();
-        $path = asset("storage/" . $file->storePubliclyAs('images/customer/profile', $filename, 'public'));
-        return response()->json(['path' => $path]);
-        //code...
-    } catch (\Exception $e) {
-        response()->json(['message' => $e->getMessage()], 500);
-    }
-});
+//Route::post('/image/upload', function (Request $req) {
+//    try {
+//        $file = $req->file('file');
+//        $filename = Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $file->getClientOriginalExtension();
+//        $path = asset("storage/" . $file->storePubliclyAs('images/customer/profile', $filename, 'public'));
+//        return response()->json(['path' => $path]);
+//        //code...
+//    } catch (\Exception $e) {
+//        response()->json(['message' => $e->getMessage()], 500);
+//    }
+//});
