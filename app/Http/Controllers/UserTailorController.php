@@ -442,7 +442,7 @@ class UserTailorController extends Controller
                     'error' => $validator->errors()
                 ], 'Data tidak valid', 422);
             }
-            $uuid = $req->user()->uuid;
+            $uuid = $req->user('sanctum')->uuid;
             $userTailor = UserTailor::where('uuid', $uuid);
 
             if ($userTailor == null) {
