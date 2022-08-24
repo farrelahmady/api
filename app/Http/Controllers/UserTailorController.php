@@ -350,7 +350,6 @@ class UserTailorController extends Controller
    public function updatePicture(Request $req)
    {
       try {
-         return ResponseFormatter::success($req->allFiles(), 'Testing');
          $validator = Validator::make($req->all(), [
             'profile_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
             'place_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
