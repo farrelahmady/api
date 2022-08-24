@@ -430,9 +430,6 @@ class UserTailorController extends Controller
     public function update(Request $request, $uuid)
     {
         try {
-            if ($uuid == "picture") {
-                return $this->updatePicture($request);
-            }
             $validator = Validator::make($request->all(), [
                 'old_password' => [RulesPassword::min(8)->numbers()->letters()],
                 'password' => ["string", "confirmed",  RulesPassword::min(8)->numbers()->letters()],
