@@ -397,7 +397,7 @@ class UserTailorController extends Controller
                     Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
                 }
 
-                $fileName = "tlr-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('place_picture')->getClientOriginalExtension();
+                $fileName = "plc-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('place_picture')->getClientOriginalExtension();
                 $place_picture = asset('storage/' . $req->file('place_picture')->storePubliclyAs('images/tailor/place', $fileName, "public"));
                 // return ;
                 //if (!Storage::disk('public')->exists(substr($place_picture, strpos($place_picture, 'images')))) {
