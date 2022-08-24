@@ -231,6 +231,7 @@ class UserCustomerController extends Controller
                 'password_confirmation'  => ['required_with:password', "string", 'same:password',],
                 'first_name' => ['nullable', 'string', 'min:3', 'max:255'],
                 'last_name' => ['nullable', 'string', 'min:3', 'max:255'],
+                'phone_number' => ['nullable', 'phone_number', 'min:10', 'max:15'],
                 'address' => ['nullable', 'string', 'max:255'],
                 'district' => ['nullable', 'string', 'max:255'],
                 'city' => ['nullable', 'string', 'max:255'],

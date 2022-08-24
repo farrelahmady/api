@@ -123,6 +123,7 @@ return [
     'uploaded'    => ':attribute gagal diunggah.',
     'url'         => 'Format :attribute tidak valid.',
     'uuid'        => ':attribute harus merupakan UUID yang valid.',
+    'phone_number' => ':attribute harus berupa nomor telepon yang valid.',
 
     /*
     |---------------------------------------------------------------------------------------
