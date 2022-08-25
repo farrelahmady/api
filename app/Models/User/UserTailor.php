@@ -2,12 +2,13 @@
 
 namespace App\Models\User;
 
-use App\Models\ManagementAccess\Availability;
 use App\Models\Traits\HasUuid;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Operational\Review;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notifiable;
 
+use App\Models\ManagementAccess\Availability;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\ManagementAccess\UserTailorDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,8 @@ class UserTailor extends Authenticatable
 
     protected $guarded = ['id'];
 
+    protected $appends = ['rating', 'total_review'];
+
     // protected $with = ['profile'];
 
     protected $casts = [
@@ -29,7 +32,6 @@ class UserTailor extends Authenticatable
     ];
 
     protected $hidden = [
-        'id',
         'password',
         'is_admin',
     ];
@@ -47,6 +49,17 @@ class UserTailor extends Authenticatable
     public function availability()
     {
         return $this->hasMany(Availability::class, 'user_tailor_id', 'uuid');
+    }
+
+    public function getRatingAttribute()
+    {
+        $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))->groupBy('user_tailor_id')->where('user_tailor_id', $this->id)->first();
+        return $rating ? (int)$rating->rating : 0;
+    }
+    public function getTotalReviewAttribute()
+    {
+        $rating = Review::select('user_tailor_id', DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $this->id)->first();
+        return $rating ? (int)$rating->total_review : 0;
     }
 
     public function getRouteKeyName()

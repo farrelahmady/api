@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\User\UserTailor;
 use App\Models\User\UserCustomer;
 use App\Helpers\ResponseFormatter;
+use App\Models\Operational\Review;
+use Illuminate\Support\Facades\DB;
 use App\Models\Operational\Appointment;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\Availability;
@@ -21,6 +23,7 @@ class AppointmentController extends Controller
             $tailor = UserTailor::withTrashed()->where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
             $customer = UserCustomer::withTrashed()->where('uuid', auth('sanctum')->user()['uuid'])->where('email', auth('sanctum')->user()['email'])->first();
             if ($admin) {
+
                 $data = Appointment::with(['tailor.profile', 'customer.profile']);
 
                 if ($req->has('customer')) {
@@ -55,16 +58,13 @@ class AppointmentController extends Controller
             }
 
 
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->get();
 
-            $data = $data->get()->each(function ($item) {
+            $data = $data->get()->each(function ($item) use ($rating) {
 
                 $item->date = Carbon::parse($item->date)->settings(['formatFunction' => 'translatedFormat'])->format('l, d F Y');
                 $item->status = (int)$item->status;
             });
-            //$data = Appointment::all()->each(function ($item) {
-            //    $item->tailor->profile;
-            //    $item->customer->profile;
-            //});
 
             return ResponseFormatter::success(
                 $data,
