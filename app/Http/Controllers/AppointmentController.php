@@ -74,6 +74,41 @@ class AppointmentController extends Controller
             return ResponseFormatter::error(data: $e->getMessage(), message: 'Something Went Wrong', code: 500);
         }
     }
+
+    public function show($uuid)
+    {
+        try {
+            $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('uuid', $uuid);
+            switch (auth()->user()->currentAccessToken()->tokenable_type) {
+                case UserTailor::class:
+                    $data = $data->whereHas('tailor', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+                case UserCustomer::class:
+                    $data = $data->whereHas('customer', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+            }
+
+            $data = $data->first();
+            if ($data) {
+                $data->date = Carbon::parse($data->date)->settings(['formatFunction' => 'translatedFormat'])->format('l, d F Y');
+                $data->status = (int)$data->status;
+                return ResponseFormatter::success(
+                    $data,
+                    'Data retrieved successfully'
+                );
+            } else {
+                return ResponseFormatter::error(data: '', message: 'Data not found', code: 404);
+            }
+        } catch (\Exception $e) {
+            return ResponseFormatter::error(data: $e->getMessage(), message: 'Something Went Wrong', code: 500);
+        }
+    }
+
+
     public function store(Request $req)
     {
         // return ResponseFormatter::success($req->all(), 'Data berhasil ditambahkan');

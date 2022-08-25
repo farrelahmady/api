@@ -2,6 +2,7 @@
 
 namespace App\Models\Operational;
 
+use App\Models\Traits\HasUuid;
 use App\Models\User\UserTailor;
 use App\Models\User\UserCustomer;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Appointment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuid;
 
     protected $table = 'appointments';
 

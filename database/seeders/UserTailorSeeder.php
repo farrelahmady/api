@@ -47,7 +47,7 @@ class UserTailorSeeder extends Seeder
             'email' => 'supertailor@gmail.com',
             'password' => Hash::make("tailor123"),
             'is_premium' => true,
-            'max_schedule_slot' => 5,
+            'max_schedule_slot' => "5",
         ])->profile()->create([
             'first_name' => 'Super',
             'last_name' => 'Tailor',
@@ -65,7 +65,7 @@ class UserTailorSeeder extends Seeder
             'email' => 'testTailor@gmail.com',
             'password' => Hash::make("tailor123"),
             'is_premium' => true,
-            'max_schedule_slot' => 5,
+            'max_schedule_slot' => "5",
         ])->profile()->create([
             'first_name' => 'Test',
             'last_name' => 'Tailor',
@@ -84,7 +84,7 @@ class UserTailorSeeder extends Seeder
 
             if ($userTailor->is_premium) {
                 $userTailor->update([
-                    'max_schedule_slot' => 5,
+                    'max_schedule_slot' => "5",
                 ]);
             }
 

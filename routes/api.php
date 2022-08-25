@@ -89,6 +89,7 @@ Route::controller(AppointmentController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/appointment', 'store');
         Route::get('/appointment', 'index');
+        Route::get('/appointment/{uuid}', 'show');
     });
     // Route::get('/appointment/{uuid}', 'show');
     // Route::put('/appointment/{uuid}', 'update');
