@@ -442,6 +442,7 @@ class UserTailorController extends Controller
     public function update(Request $request, $uuid)
     {
         try {
+
             $validator = Validator::make($request->all(), [
                 'old_password' => [RulesPassword::min(8)->numbers()->letters()],
                 'password' => ["string", "confirmed",  RulesPassword::min(8)->numbers()->letters()],
@@ -455,6 +456,7 @@ class UserTailorController extends Controller
                 'city' => ['nullable', 'string', 'max:255'],
                 'province' => ['nullable', 'string', 'max:255'],
                 'zip_code' => ['nullable', 'numeric', 'digits:5'],
+                'premium' => ['nullable', 'boolean'],
             ]);
 
             if ($validator->fails()) {
@@ -479,6 +481,10 @@ class UserTailorController extends Controller
 
             if ($request->password) {
                 $userTailor->password = Hash::make($request->password);
+            }
+
+            if ($request->has('premium')) {
+                $userTailor->is_premium = $request->premium;
             }
 
             if ($request->first_name) {
@@ -517,6 +523,8 @@ class UserTailorController extends Controller
                 $userTailor->profile->zip_code = $request->zip_code;
             }
 
+
+
             $userTailor->profile->save();
 
             return ResponseFormatter::success($userTailor, 'User Tailor berhasil diperbarui');
@@ -533,9 +541,76 @@ class UserTailorController extends Controller
      * @param  \App\Models\UserTailor  $userTailor
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserTailor $userTailor)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\UserTailor  $userTailor
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $uuid)
     {
-        //
+        // return UserTailor::class;
+        try {
+            $userTailor = UserTailor::where('uuid', $uuid)->first();
+            if (!$userTailor) {
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+            $userTailor->delete();
+            $userTailor->profile->delete();
+            $userTailor->tokens()->delete();
+
+            return ResponseFormatter::success(null, 'User Tailor berhasil di non aktifkan');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
+    }
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\UserTailor  $userTailor
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $uuid)
+    {
+        try {
+            $userTailor = UserTailor::onlyTrashed()->where('uuid', $uuid)->first();
+            if (!$userTailor) {
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+            // return $userTailor->profile;
+            if ($userTailor->profile->profile_picture) {
+                $path = substr($userTailor->profile->profile_picture, strpos($userTailor->profile->profile_picture, 'images'));
+                Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+            }
+            $userTailor->forceDelete();
+            return ResponseFormatter::success(null, 'User Tailor berhasil dihapus');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
+    }
+
+    public function restore($uuid)
+    {
+        try {
+            $userTailor = UserTailor::onlyTrashed()->where('uuid', $uuid)->first();
+            if (!$userTailor) {
+                return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
+            }
+            $profile = UserTailorDetail::onlyTrashed()->where('user_tailor_id', $userTailor->id)->first();
+            if ($profile) {
+                $profile->restore();
+            }
+            $userTailor->restore();
+            $userTailor = UserTailor::find($userTailor->id)->first()->makeHidden(['created_at', 'updated_at']);
+            $profile = UserTailorDetail::find($profile->id)->first()->makeHidden(['created_at', 'updated_at']);
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
+
+            $userTailor = collect($userTailor)->merge($profile)->merge($rating);
+
+            return ResponseFormatter::success($userTailor, 'User Tailor berhasil di aktifkan');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "terjadi kesalahan", 500);
+        }
     }
 
     public function deletePicture($field)

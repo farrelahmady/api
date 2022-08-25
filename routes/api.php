@@ -38,8 +38,11 @@ Route::controller(UserTailorController::class)->group(function () {
         Route::post('/tailor/logout', 'logout')->name('tailor.logout');
         Route::post('/tailor/{uuid}', 'update');
         Route::post('/tailor/{uuid}/picture', 'updatePicture');
-        Route::delete('/tailor/{uuid}', 'destroy');
         Route::delete('/tailor/picture/{field}', 'deletePicture');
+        Route::middleware('admin')->group(function () {
+            Route::post('/tailor/trash/{uuid}', 'restore');
+            Route::delete('/tailor/{uuid}', 'delete');
+        });
     });
 });
 
