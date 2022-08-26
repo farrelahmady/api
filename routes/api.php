@@ -90,6 +90,7 @@ Route::controller(AppointmentController::class)->group(function () {
         Route::post('/appointment', 'store');
         Route::get('/appointment', 'index');
         Route::get('/appointment/{uuid}', 'show');
+        Route::post('/appointment/{uuid}', 'update');
     });
     // Route::get('/appointment/{uuid}', 'show');
     // Route::put('/appointment/{uuid}', 'update');

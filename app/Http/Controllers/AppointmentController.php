@@ -176,4 +176,36 @@ class AppointmentController extends Controller
             return ResponseFormatter::error(message: $e->getMessage(), code: 500);
         }
     }
+
+    public function update(Request $req, $uuid)
+    {
+        try {
+            if (count($req->all()) <= 0) {
+                return ResponseFormatter::error(message: 'Data tidak boleh kosong', code: 400);
+            }
+            $data = Appointment::where('uuid', $uuid);
+            switch (auth()->user()->currentAccessToken()->tokenable_type) {
+                case UserTailor::class:
+                    $data = $data->whereHas('tailor', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+                case UserCustomer::class:
+                    $data = $data->whereHas('customer', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+            }
+            $data = $data->first();
+            if (!$data) {
+                return ResponseFormatter::error(data: '', message: 'Data not found', code: 404);
+            }
+
+            $data->update($req->only(['status']));
+
+            return ResponseFormatter::success($data, 'Berhasil mengubah status appointment');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error(message: $e->getMessage(), code: 500);
+        }
+    }
 }

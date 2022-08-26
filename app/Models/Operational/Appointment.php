@@ -15,7 +15,13 @@ class Appointment extends Model
 
     protected $table = 'appointments';
 
+
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'status' => 'integer',
+    ];
+
 
     public function tailor()
     {

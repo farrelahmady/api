@@ -15,7 +15,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('appointments', function (Blueprint $table) {
-            $table->string('uuid')->primary();
+            $table->id();
+            $table->uuid()->unique();
             $table->foreignUuid('user_customer_id')->constrained("user_customers", "uuid")->onUpdate('cascade')->onDelete('cascade');
             $table->foreignUuid('user_tailor_id')->constrained("user_tailors", "uuid")->onUpdate('cascade')->onDelete('cascade');
             $table->date('date');
