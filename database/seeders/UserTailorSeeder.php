@@ -20,8 +20,8 @@ class UserTailorSeeder extends Seeder
      */
     public function run()
     {
-        $profiles = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/profile/') !== false)->values();
-        $places = collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/place/') !== false)->values();
+        $profiles = collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/profile/') !== false)->values();
+        $places = collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/place/') !== false)->values();
 
         echo $profiles->count() . " files found. ";
         echo $places->count() . " files found. ";
