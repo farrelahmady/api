@@ -56,7 +56,7 @@ class AvailabilityController extends Controller
                 $date->keys()->each(function ($item) use ($key, $date, $schedule) {
                     $time = collect();
                     $date[$item]->each(function ($item) use ($time, $key) {
-                        $time->push(["time" => $item->time, "booked" => Appointment::where('date', $item->date)->where('time', $item->time)->where('user_tailor_id', $key)->get()->count() > 0 ? true : false]);
+                        $time->push(["time" => $item->time, "booked" => Appointment::where('date', $item->date)->where('time', $item->time)->where('user_tailor_id', $key)->where('status', '<', 5)->get()->count() > 0 ? true : false]);
                     });
                     $schedule->push(
                         [
