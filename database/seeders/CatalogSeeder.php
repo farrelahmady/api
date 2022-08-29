@@ -21,14 +21,14 @@ class CatalogSeeder extends Seeder
     {
         $files = collect([
             "lower" => collect([
-                "celana-pendek" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/celana-pendek') !== false)->values(),
-                "jeans" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/jeans') !== false)->values(),
+                "celana-pendek" => collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/celana-pendek') !== false)->values(),
+                "jeans" => collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/catalog/lower/jeans') !== false)->values(),
 
             ]),
             "upper" => collect([
-                "batik" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/batik') !== false)->values(),
-                "kaos" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/kaos') !== false)->values(),
-                "hoodie" => collect(Storage::disk('public')->allFiles())->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/hoodie') !== false)->values()
+                "batik" => collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/batik') !== false)->values(),
+                "kaos" => collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/kaos') !== false)->values(),
+                "hoodie" => collect(Storage::disk('public')->allFiles('images'))->filter(fn ($file) => strpos($file, 'images/tailor/catalog/upper/hoodie') !== false)->values()
 
             ])
         ]);
