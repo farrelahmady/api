@@ -11,6 +11,7 @@ use App\Models\ManagementAccess\Availability;
 use App\Http\Controllers\UserTailorController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserCustomerController;
 
 /*
@@ -95,6 +96,12 @@ Route::controller(AppointmentController::class)->group(function () {
     // Route::get('/appointment/{uuid}', 'show');
     // Route::put('/appointment/{uuid}', 'update');
     // Route::delete('/appointment/{uuid}', 'destroy');
+});
+
+Route::controller(TransactionController::class)->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/transaction', 'store');
+    });
 });
 
 //Route::post('/image/upload', function (Request $req) {

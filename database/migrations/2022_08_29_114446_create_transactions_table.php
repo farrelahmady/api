@@ -15,6 +15,15 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->string('uuid')->unique();
+            $table->foreignUuid('user_tailor_id')->constrained("user_tailors", "uuid")->onUpdate(
+                'cascade'
+            )->onDelete('cascade');
+            $table->string('transaction_code');
+            $table->float('gross_amount');
+            $table->string('currency')->default('IDR');
+            $table->string('category');
+            $table->enum('status', [1, 2, 3])->default(1);
             $table->timestamps();
         });
     }
