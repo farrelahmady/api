@@ -336,8 +336,8 @@ class UserTailorController extends Controller
    {
       try {
          $validator = Validator::make($req->all(), [
-            'profile_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'place_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'profile_picture' => 'image|mimes:jpeg,png,jpg|max:1024',
+            'place_picture' => 'image|mimes:jpeg,png,jpg|max:1024',
          ]);
 
          if ($validator->fails()) {
