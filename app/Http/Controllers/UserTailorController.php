@@ -335,6 +335,7 @@ class UserTailorController extends Controller
     public function updatePicture(Request $req)
     {
         try {
+            return ResponseFormatter::success('TESTING');
             $validator = Validator::make($req->all(), [
                 'profile_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
                 'place_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
@@ -376,7 +377,6 @@ class UserTailorController extends Controller
             }
 
             if ($req->hasFile('place_picture') && $req->file('place_picture')->isValid()) {
-                return ResponseFormatter::success('TESTING');
                 if ($userTailor->profile->place_picture) {
 
                     $path = substr($userTailor->profile->place_picture, strpos($userTailor->profile->place_picture, 'images'));
