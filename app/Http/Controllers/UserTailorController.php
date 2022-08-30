@@ -376,6 +376,7 @@ class UserTailorController extends Controller
             }
 
             if ($req->hasFile('place_picture') && $req->file('place_picture')->isValid()) {
+                return ResponseFormatter::success('TESTING');
                 if ($userTailor->profile->place_picture) {
 
                     $path = substr($userTailor->profile->place_picture, strpos($userTailor->profile->place_picture, 'images'));
