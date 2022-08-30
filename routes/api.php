@@ -101,6 +101,7 @@ Route::controller(AppointmentController::class)->group(function () {
 Route::controller(TransactionController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/transaction', 'store');
+        Route::post('/transaction/{order_id}', 'update');
     });
 });
 

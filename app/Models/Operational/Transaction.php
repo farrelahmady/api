@@ -13,8 +13,10 @@ class Transaction extends Model
 
     protected $guarded = ['id'];
 
+    protected $with = ['tailor'];
+
     public function tailor()
     {
-        return $this->belongsTo(UserTailor::class);
+        return $this->belongsTo(UserTailor::class, 'user_tailor_id', 'uuid');
     }
 }
