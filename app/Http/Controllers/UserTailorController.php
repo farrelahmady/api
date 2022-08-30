@@ -383,7 +383,7 @@ class UserTailorController extends Controller
                 }
 
                 $fileName = "plc-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('place_picture')->getClientOriginalExtension();
-                $place_picture = asset('storage/' . $req->file('place_picture')->storePubliclyAs('images/tailor/place', $fileName, "public"));
+                $place_picture = asset('storage/' . $req->file('place_picture')->storePubliclyAs('images/tailor/tailorplace', $fileName, "public"));
                 // return ;
                 //if (!Storage::disk('public')->exists(substr($place_picture, strpos($place_picture, 'images')))) {
                 //    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
