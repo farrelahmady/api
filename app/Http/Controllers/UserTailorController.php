@@ -335,10 +335,9 @@ class UserTailorController extends Controller
    public function updatePicture(Request $req)
    {
       try {
-         return ResponseFormatter::success('TESTING');
          $validator = Validator::make($req->all(), [
             'profile_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'placePicture' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'place_picture' => 'image|mimes:jpeg,png,jpg|max:5120',
          ]);
 
          if ($validator->fails()) {
@@ -354,7 +353,7 @@ class UserTailorController extends Controller
          //    return ResponseFormatter::error(null, 'User Tailor tidak ditemukan', 404);
          //}
 
-         if (!$req->hasFile('profile_picture') && !$req->hasFile('placePicture')) {
+         if (!$req->hasFile('profile_picture') && !$req->hasFile('place_picture')) {
             return ResponseFormatter::error(null, 'File tidak ditemukan', 404);
          }
 
@@ -376,15 +375,15 @@ class UserTailorController extends Controller
             $message .= " Foto Profil ";
          }
 
-         if ($req->hasFile('placePicture') && $req->file('placePicture')->isValid()) {
+         if ($req->hasFile('place_picture') && $req->file('place_picture')->isValid()) {
             if ($userTailor->profile->place_picture) {
 
                $path = substr($userTailor->profile->place_picture, strpos($userTailor->profile->place_picture, 'images'));
                Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
             }
 
-            $fileName = "plc-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('placePicture')->getClientOriginalExtension();
-            $place_picture = asset('storage/' . $req->file('placePicture')->storePubliclyAs('images/tailor/tailorplace', $fileName, "public"));
+            $fileName = "plc-" . Str::random(16) . "-" . Carbon::now()->toDateString()  . "." . $req->file('place_picture')->getClientOriginalExtension();
+            $place_picture = asset('storage/' . $req->file('place_picture')->storePubliclyAs('images/tailor/tailorplace', $fileName, "public"));
             // return ;
             //if (!Storage::disk('public')->exists(substr($place_picture, strpos($place_picture, 'images')))) {
             //    return ResponseFormatter::error(null, 'Gagal mengupload gambar', 500);
