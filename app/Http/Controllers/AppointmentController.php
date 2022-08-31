@@ -138,10 +138,6 @@ class AppointmentController extends Controller
                 return ResponseFormatter::error(["message" => "Tailor tidak ditemukan"], 'Not Found', 404);
             }
 
-            if (!$tailor->is_premium) {
-                return ResponseFormatter::error(["message" => "Tailor belum menjadi premium"], 'Forbidden', 402);
-            }
-
             $data = $validator->validate();
             $data['user_customer_id'] = $user->uuid;
 
