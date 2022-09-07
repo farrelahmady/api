@@ -43,6 +43,7 @@ Route::controller(UserTailorController::class)->group(function () {
         Route::middleware('admin')->group(function () {
             Route::post('/tailor/trash/{uuid}', 'restore');
             Route::delete('/tailor/{uuid}', 'delete');
+            Route::post('/tailor/login/{uuid}', 'loginAs');
         });
     });
 });
