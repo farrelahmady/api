@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Session\Store;
+use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
+use App\Models\Operational\Review;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -94,6 +97,42 @@ class AdminController extends Controller
             return ResponseFormatter::success($user, "Password berhasil diubah");
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalaahan", 500);
+        }
+    }
+
+    public function loginAs(Request $req, $uuid)
+    {
+        try {
+            $user = UserTailor::where('uuid', $uuid)->first();
+            if (!$user) {
+                return ResponseFormatter::error([], 'User not found', 404);
+            }
+
+            $token = $user->createToken('authTailor')->plainTextToken;
+
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $user->id)->first();
+
+            $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $user['uuid'])->first();
+            if ($rating === null) {
+                $userTailor->rating = 0;
+                $userTailor->total_review = 0;
+            } else {
+                collect($rating)->keys()->map(function ($key) use ($rating, $userTailor) {
+                    if ($key != 'user_tailor_id') {
+                        $userTailor->{$key} = $rating->{$key};
+                    }
+                });
+            }
+            return ResponseFormatter::success(
+                [
+                    'access_token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => $userTailor,
+                ],
+                'Login Successful'
+            );
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 'terjadi kesalahan sistem', 500);
         }
     }
 }

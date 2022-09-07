@@ -43,7 +43,6 @@ Route::controller(UserTailorController::class)->group(function () {
         Route::middleware('admin')->group(function () {
             Route::post('/tailor/trash/{uuid}', 'restore');
             Route::delete('/tailor/{uuid}', 'delete');
-            Route::post('/tailor/login/{uuid}', 'loginAs');
         });
     });
 });
@@ -76,6 +75,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::post('/admin/password/change', 'changePassword');
         Route::post('/admin/logout', 'logout')->name('admin.logout');
+        Route::post('/tailor/login/{uuid}', 'loginAs');
     });
 });
 
@@ -103,6 +103,8 @@ Route::controller(TransactionController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/transaction', 'store');
         Route::post('/transaction/{order_id}', 'update');
+        Route::get('/transaction', 'index');
+        Route::get('/transaction/{uuid}', 'show');
     });
 });
 
