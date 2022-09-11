@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User\Admin;
+
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-
+use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
-use App\Models\ManagementAccess\Midtrans;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\Operational\Transaction;
-use App\Models\User\Admin;
-use App\Models\User\UserTailor;
-use Carbon\Carbon;
+use App\Models\ManagementAccess\Midtrans;
 
 class TransactionController extends Controller
 {
@@ -141,11 +142,20 @@ class TransactionController extends Controller
             }
             $transaction->save();
 
-            $midtrans = Midtrans::where('order_id', $order_id)->update($status);
+            $midtransColumn = DB::getSchemaBuilder()->getColumnListing('midtrans');
+            $statusKeys = $status->keys();
+            $statusKeys->each(function ($key) use ($midtransColumn, $status, $transaction) {
+                if (!in_array($key, $midtransColumn)) {
+                    $status->forget($key);
+                }
+            });
+
+            //return $status;
+            Midtrans::where('order_id', $order_id)->update($status->toArray());
 
 
 
-            $transaction['midtrans'] = $midtrans;
+            $transaction = Transaction::where('transaction_code', $order_id)->first();
 
 
             return ResponseFormatter::success($transaction, "Transaksi berhasil dilakukan");
