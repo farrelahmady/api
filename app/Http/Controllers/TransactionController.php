@@ -6,13 +6,48 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 use App\Helpers\ResponseFormatter;
+use App\Models\ManagementAccess\Midtrans;
 use Illuminate\Support\Facades\Http;
 use App\Models\Operational\Transaction;
+use App\Models\User\Admin;
 use App\Models\User\UserTailor;
 use Carbon\Carbon;
 
 class TransactionController extends Controller
 {
+    public function index(Request $req)
+    {
+        try {
+            $status = $req->status;
+            $limit = $req->limit;
+            $transactions = Transaction::with('tailor.profile');
+
+            switch (auth()->user()->currentAccessToken()->tokenable_type) {
+                case UserTailor::class:
+                    $transactions = $transactions->whereHas('tailor', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+            }
+
+            if ($status) {
+                $transactions = $transactions->where('status', $status);
+            }
+
+            $transactions = $transactions->latest();
+
+            if ($limit) {
+                $transactions = $transactions->limit($limit);
+            }
+            $transactions = $transactions->get();
+            return ResponseFormatter::success(
+                $transactions,
+                count($transactions) . " data transaksi berhasil didapatkan"
+            );
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
+        }
+    }
     public function store(Request $req)
     {
         try {
@@ -32,12 +67,16 @@ class TransactionController extends Controller
                     return ResponseFormatter::error(message: 'Layanan tidak tersedia', code: 500);
                     break;
             }
+            $transaction_code = "SUPERTAILOR-" . Str::random(4) . now()->format('YmdHis');
             $transaction = Transaction::create([
                 'user_tailor_id' => $tailor->uuid,
-                'transaction_code' => "SUPERTAILOR-" . Str::random(4) . now()->format('YmdHis'),
+                'transaction_code' => $transaction_code,
                 'category' => $category,
                 'gross_amount' => $amount,
             ]);
+
+
+
 
             //! Set Midtrans Snap Config
             $midtrans = [
@@ -58,6 +97,11 @@ class TransactionController extends Controller
             }
             // Get Snap Payment Page URL
             $paymentUrl = $fetch->collect()['redirect_url'];
+
+            Midtrans::create([
+                'order_id' => $transaction_code,
+                'gross_amount' => $amount,
+            ]);
 
 
 
@@ -97,9 +141,11 @@ class TransactionController extends Controller
             }
             $transaction->save();
 
+            $midtrans = Midtrans::where('order_id', $order_id)->update($status);
 
 
-            $transaction['midtrans'] = $status;
+
+            $transaction['midtrans'] = $midtrans;
 
 
             return ResponseFormatter::success($transaction, "Transaksi berhasil dilakukan");
