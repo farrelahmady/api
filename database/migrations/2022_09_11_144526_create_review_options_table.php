@@ -13,15 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('reviews', function (Blueprint $table) {
+        Schema::create('review_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_customer_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('user_tailor_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('review');
-            $table->tinyInteger('rating');
-            $table->text('message');
+            $table->enum('rating', [1, 2, 3, 4, 5]);
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -32,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reviews');
+        Schema::dropIfExists('review_options');
     }
 };

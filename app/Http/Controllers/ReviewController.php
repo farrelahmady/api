@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use App\Helpers\ResponseFormatter;
 use App\Models\Operational\Review;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
+use App\Models\ManagementAccess\ReviewOption;
 
 class ReviewController extends Controller
 {
@@ -16,6 +19,24 @@ class ReviewController extends Controller
     public function index()
     {
         //
+    }
+
+    public function getReviewOption(Request $req)
+    {
+        try {
+            $rating = $req->rating;
+
+
+            $reviewOptions = ReviewOption::all();
+
+            if ($rating) {
+                $reviewOptions = $reviewOptions->where('rating', $rating);
+            }
+
+            return ResponseFormatter::success($reviewOptions, 'Data review berhasil didapatkan');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
+        }
     }
 
     /**

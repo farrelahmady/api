@@ -11,6 +11,7 @@ use App\Models\ManagementAccess\Availability;
 use App\Http\Controllers\UserTailorController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserCustomerController;
 
@@ -106,6 +107,10 @@ Route::controller(TransactionController::class)->group(function () {
         Route::get('/transaction', 'index');
         Route::get('/transaction/{uuid}', 'show');
     });
+});
+
+Route::controller(ReviewController::class)->group(function () {
+    Route::get('/review/option', 'getReviewOption');
 });
 
 //Route::post('/image/upload', function (Request $req) {
