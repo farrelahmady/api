@@ -20,16 +20,13 @@ class ReviewSeeder extends Seeder
      */
     public function run()
     {
-        $badRating = ["Tidak ramah", "Tempat tidak sesuai dengan foto", "Tempat tidak ditemukan", "Tailor tidak dapat ditemui"];
-        $mediumRating = ["Tidak ramah", "Tempat tidak sesuai dengan foto", "Tempat tidak ditemukan", "Tailor tidak dapat ditemui"];
-        $goodRating = ["Ramah", "Tempat sesuai dengan foto", "Tempat ditemukan", "Tailor dapat ditemui"];
+        $badRating = ["Tidak ramah", "Tidak sesuai dengan foto", "Tidak sesuai deskripsi", "Tailor terlambat", "Lokasi tempat tidak sesuai alamat", "Tempat tidak ditemukan", "Tailor kasar", "Tailor melakukan kekerasa / pelecehan", "Tempat tidak nyaman"];
+        $goodRating = ["Tailor ramah", "Tempat nyaman", "Tailor sesuai dengan deskripsi", "Tempat bersih", "Tailor sangat membantu", "Tailor tepat waktu"];
 
         $reviewOptions = collect();
         for ($i = 1; $i <= 5; $i++) {
-            if ($i <= 2) {
+            if ($i <= 3) {
                 $options = $badRating;
-            } else if ($i <= 4) {
-                $options = $mediumRating;
             } else {
                 $options = $goodRating;
             }
