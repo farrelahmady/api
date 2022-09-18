@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\UserTailorDetail;
+use App\Models\Operational\Transaction;
 use Illuminate\Validation\Rules\Password as RulesPassword;
 
 class UserTailorController extends Controller
@@ -76,6 +77,9 @@ class UserTailorController extends Controller
                                 $userTailor->{$key} = $rating->{$key};
                             }
                         });
+                    }
+                    if ($userTailor->is_premium) {
+                        $userTailor['transaction'] = Transaction::where('user_tailor_id', $userTailor->uuid)->where('status', 2)->get();
                     }
 
 
