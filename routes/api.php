@@ -111,6 +111,10 @@ Route::controller(TransactionController::class)->group(function () {
 
 Route::controller(ReviewController::class)->group(function () {
     Route::get('/review/option', 'getReviewOption');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/review', 'store');
+        Route::get('/review', 'index');
+    });
 });
 
 //Route::post('/image/upload', function (Request $req) {

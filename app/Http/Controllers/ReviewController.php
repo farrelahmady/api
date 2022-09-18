@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User\UserTailor;
 use App\Helpers\ResponseFormatter;
 use App\Models\Operational\Review;
 use App\Http\Requests\StoreReviewRequest;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Models\ManagementAccess\ReviewOption;
+use App\Models\User\UserCustomer;
 
 class ReviewController extends Controller
 {
@@ -44,9 +47,15 @@ class ReviewController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $req)
     {
-        //
+        try {
+            $cust = auth()->user();
+
+            return $cust;
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
+        }
     }
 
     /**
@@ -55,9 +64,38 @@ class ReviewController extends Controller
      * @param  \App\Http\Requests\StoreReviewRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreReviewRequest $request)
+    public function store(Request $req)
     {
-        //
+        try {
+            $cust = auth()->user();
+
+            if ($cust->currentAccessToken()->tokenable_type != UserCustomer::class) {
+                return ResponseFormatter::error(null, "Anda tidak memiliki akses untuk melakukan review", 500);
+            }
+
+            $validator = Validator::make($req->all(), [
+                'tailor' => 'required|uuid|exists:user_tailors,uuid',
+                'review' => 'required|string|exists:review_options,review',
+                'rating' => 'required|integer|between:1,5',
+                'message' => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                return ResponseFormatter::error($validator->errors(), "Terjadi Kesalahan Sistem", 500);
+            }
+
+            $data = $validator->validate();
+
+            $data['user_customer_id'] = $cust->uuid;
+            $data['user_tailor_id'] = $data['tailor'];
+            unset($data['tailor']);
+
+            $review = Review::create($data)->load('customer.profile', 'tailor.profile');
+
+            return ResponseFormatter::success($review, 'Data review berhasil dibuat');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
+        }
     }
 
     /**

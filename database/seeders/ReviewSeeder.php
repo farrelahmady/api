@@ -48,8 +48,8 @@ class ReviewSeeder extends Seeder
             for ($i = 0; $i < 10; $i++) {
                 $rating = $faker->numberBetween(1, 5);
                 ReviewFactory::new()->create([
-                    'user_tailor_id' => $tailor->id,
-                    'user_customer_id' => $faker->numberBetween(1, UserCustomer::count()),
+                    'user_tailor_id' => $tailor->uuid,
+                    'user_customer_id' => UserCustomer::all()->random()->uuid,
                     'rating' => $rating,
                     'review' => ReviewOption::where('rating', $rating)->get()->random()->review,
                     'message' => $faker->text

@@ -15,11 +15,12 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_customer_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('user_tailor_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->uuid('uuid')->unique();
+            $table->foreignUuid('user_customer_id')->constrained('user_customers', 'uuid')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignUuid('user_tailor_id')->constrained("user_tailors", "uuid")->onUpdate('cascade')->onDelete('cascade');
             $table->string('review');
             $table->tinyInteger('rating');
-            $table->text('message');
+            $table->text('message')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

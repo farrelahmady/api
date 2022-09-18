@@ -43,7 +43,7 @@ class UserTailor extends Authenticatable
 
     public function review()
     {
-        return $this->hasMany(Review::class, 'user_tailor_id', 'id');
+        return $this->hasMany(Review::class, 'user_tailor_id', 'uuid');
     }
 
     public function availability()
@@ -53,12 +53,12 @@ class UserTailor extends Authenticatable
 
     public function getRatingAttribute()
     {
-        $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))->groupBy('user_tailor_id')->where('user_tailor_id', $this->id)->first();
+        $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'))->groupBy('user_tailor_id')->where('user_tailor_id', $this->uuid)->first();
         return $rating ? (int)$rating->rating : 0;
     }
     public function getTotalReviewAttribute()
     {
-        $rating = Review::select('user_tailor_id', DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $this->id)->first();
+        $rating = Review::select('user_tailor_id', DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $this->uuid)->first();
         return $rating ? (int)$rating->total_review : 0;
     }
 

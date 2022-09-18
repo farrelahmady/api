@@ -40,7 +40,7 @@ return [
     'distinct'       => ':attribute memiliki nilai yang duplikat.',
     'email'          => ':attribute harus berupa alamat surel yang valid.',
     'ends_with'      => ':attribute harus diakhiri salah satu dari berikut: :values',
-    'exists'         => ':attribute yang dipilih tidak valid.',
+    'exists'         => ':attribute tidak ditemukan.',
     'file'           => ':attribute harus berupa sebuah berkas.',
     'filled'         => ':attribute harus memiliki nilai.',
     'gt'             => [

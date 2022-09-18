@@ -65,7 +65,8 @@ class UserTailorController extends Controller
                     $token = $user->createToken('authTailor')->plainTextToken;
 
 
-                    $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $user->id)->first();
+                    $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $user->uuid)->first();
+
 
                     $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $user['uuid'])->first();
                     if ($rating === null) {
@@ -401,7 +402,7 @@ class UserTailorController extends Controller
             $userTailor->profile->save();
 
             $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.id', $id)->first();
-            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->uuid)->first();
 
             if ($rating === null) {
                 $userTailor->rating = 0;
@@ -582,7 +583,7 @@ class UserTailorController extends Controller
             $userTailor->restore();
             $userTailor = UserTailor::find($userTailor->id)->first()->makeHidden(['created_at', 'updated_at']);
             $profile = UserTailorDetail::find($profile->id)->first()->makeHidden(['created_at', 'updated_at']);
-            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->uuid)->first();
 
             $userTailor = collect($userTailor)->merge($profile)->merge($rating);
 
@@ -620,7 +621,7 @@ class UserTailorController extends Controller
             $userTailor->profile->save();
 
             $userTailor = UserTailor::join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.id', $id)->first();
-            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->id)->first();
+            $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->where('user_tailor_id', $userTailor->uuid)->first();
 
             if ($rating === null) {
                 $userTailor->rating = 0;
