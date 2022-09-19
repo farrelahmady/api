@@ -28,15 +28,25 @@ class ReviewController extends Controller
     {
         try {
             $rating = $req->rating;
+            $options = collect();
 
 
             $reviewOptions = ReviewOption::all();
 
+
+            $keyRating = $reviewOptions->groupBy('rating')->keys();
+            $keyRating->each(function ($key) use ($options, $reviewOptions) {
+                $options->push([
+                    'rating' => $key,
+                    "review" => $reviewOptions->where('rating', $key)->pluck('review')
+                ]);
+            });
+
             if ($rating) {
-                $reviewOptions = $reviewOptions->where('rating', $rating);
+                $options = $options->where('rating', $rating)[0];
             }
 
-            return ResponseFormatter::success($reviewOptions, 'Data review berhasil didapatkan');
+            return ResponseFormatter::success($options, 'Data review berhasil didapatkan');
         } catch (\Exception $e) {
             return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
         }
