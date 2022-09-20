@@ -41,6 +41,11 @@ class TransactionController extends Controller
                 $transactions = $transactions->limit($limit);
             }
             $transactions = $transactions->get();
+
+            if ($transactions == null) {
+                return ResponseFormatter::error(null, "Transaksi tidak ditemukan", 404);
+            }
+
             return ResponseFormatter::success(
                 $transactions,
                 count($transactions) . " data transaksi berhasil didapatkan"
