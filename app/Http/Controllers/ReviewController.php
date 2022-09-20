@@ -85,7 +85,7 @@ class ReviewController extends Controller
 
             $validator = Validator::make($req->all(), [
                 'tailor' => 'required|uuid|exists:user_tailors,uuid',
-                'review' => 'required|string|exists:review_options,review',
+                'review' => 'nullable|string|exists:review_options,review',
                 'rating' => 'required|integer|between:1,5',
                 'message' => 'nullable|string',
             ]);
