@@ -42,7 +42,7 @@ class TransactionController extends Controller
             }
             $transactions = $transactions->get();
 
-            if ($transactions == null) {
+            if ($transactions->count() == 0) {
                 return ResponseFormatter::error(null, "Transaksi tidak ditemukan", 404);
             }
 
