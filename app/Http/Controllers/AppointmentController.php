@@ -35,6 +35,20 @@ class AppointmentController extends Controller
                 $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('user_customer_id', auth('sanctum')->user()['uuid']);
             }
 
+            if ($req->has('search')) {
+                $data = $data->where(function ($data) use ($req) {
+                    $data->has('tailor.profile')->whereHas('tailor.profile', function ($query) use ($req) {
+                        $query->where(DB::raw('lower(first_name)'), 'like', '%' . $req->search . '%')
+                            ->orWhere(DB::raw('lower(last_name)'), 'like', '%' . $req->search . '%')
+                            ->orWhere(DB::raw('lower(address)'), 'like', '%' . strtolower($req->search) . '%')
+                            ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($req->search) . '%')
+                            ->orWhere(DB::raw('lower(city)'), 'like', '%' . strtolower($req->search) . '%')
+                            ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($req->search) . '%');
+                    })->orWhereHas('customer.profile', function ($query) use ($req) {
+                        $query->where(DB::raw('lower(first_name)'), 'like', '%' . $req->search . '%')->orWhere(DB::raw('lower(last_name)'), 'like', '%' . $req->search . '%');
+                    })->orWhere('date', 'like', '%' . $req->search . '%');
+                });
+            }
 
 
             if ($req->has('status')) {
@@ -57,23 +71,11 @@ class AppointmentController extends Controller
                 $data = $data->where('time', $req->time);
             }
 
-            if ($req->has('search')) {
-                $data = $data->has('tailor.profile')->whereHas('tailor.profile', function ($query) use ($req) {
-                    $query->where(DB::raw('lower(first_name)'), 'like', '%' . $req->search . '%')
-                        ->orWhere(DB::raw('lower(last_name)'), 'like', '%' . $req->search . '%')
-                        ->orWhere(DB::raw('lower(address)'), 'like', '%' . strtolower($req->search) . '%')
-                        ->orWhere(DB::raw('lower(district)'), 'like', '%' . strtolower($req->search) . '%')
-                        ->orWhere(DB::raw('lower(city)'), 'like', '%' . strtolower($req->search) . '%')
-                        ->orWhere(DB::raw('lower(province)'), 'like', '%' . strtolower($req->search) . '%');
-                })->orWhereHas('customer.profile', function ($query) use ($req) {
-                    $query->where(DB::raw('lower(first_name)'), 'like', '%' . $req->search . '%')->orWhere(DB::raw('lower(last_name)'), 'like', '%' . $req->search . '%');
-                })->orWhere('date', 'like', '%' . $req->search . '%');
-            }
 
 
             $rating = Review::select('user_tailor_id', DB::raw('CAST(AVG(rating) AS DECIMAL(5,0)) as rating'), DB::raw('COUNT(*) as total_review'))->groupBy('user_tailor_id')->get();
 
-            $data = $data->get()->each(function ($item) use ($rating) {
+            $data = $data->get()->each(function ($item) {
 
                 $item->date = Carbon::parse($item->date)->settings(['formatFunction' => 'translatedFormat'])->format('l, d F Y');
                 $item->status = (int)$item->status;
