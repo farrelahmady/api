@@ -35,7 +35,7 @@ class AppointmentController extends Controller
                 $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('user_customer_id', auth('sanctum')->user()['uuid']);
             }
 
-            if ($req->has('search')) {
+            if ($req->input('search')) {
                 $data = $data->where(function ($data) use ($req) {
                     $data->has('tailor.profile')->whereHas('tailor.profile', function ($query) use ($req) {
                         $query->where(DB::raw('lower(first_name)'), 'like', '%' . $req->search . '%')
@@ -51,23 +51,23 @@ class AppointmentController extends Controller
             }
 
 
-            if ($req->has('status')) {
+            if ($req->input('status')) {
                 $data = $data->where('status', $req->status);
             }
 
-            if ($req->has('date')) {
+            if ($req->input('date')) {
                 $data = $data->where('date', $req->date);
             }
 
-            if ($req->has('before')) {
+            if ($req->input('before')) {
                 $data = $data->where('date', '<', Carbon::parse($req->before));
             }
 
-            if ($req->has('after')) {
+            if ($req->input('after')) {
                 $data = $data->where('date', '>', Carbon::parse($req->after));
             }
 
-            if ($req->has('time')) {
+            if ($req->input('time')) {
                 $data = $data->where('time', $req->time);
             }
 
