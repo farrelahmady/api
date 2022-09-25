@@ -83,7 +83,9 @@ Route::controller(AdminController::class)->group(function () {
 Route::controller(AvailabilityController::class)->group(function () {
     Route::get('/availability', 'index');
     Route::get('/availability/{uuid}', 'show');
-    Route::post('/availability', 'store');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/availability', 'store');
+    });
     Route::put('/availability/{uuid}', 'update');
     Route::delete('/availability/{uuid}', 'destroy');
 });
