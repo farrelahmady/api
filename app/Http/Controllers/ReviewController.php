@@ -100,7 +100,9 @@ class ReviewController extends Controller
             $data['user_tailor_id'] = $data['tailor'];
             unset($data['tailor']);
 
-            $review = Review::create($data)->load('customer.profile', 'tailor.profile');
+            $review = Review::create($data);
+
+            $review = Review::with(['customer.profile', 'tailor.profile'])->where('uuid', $review->uuid)->first();
 
             return ResponseFormatter::success($review, 'Data review berhasil dibuat');
         } catch (\Exception $e) {
