@@ -19,9 +19,42 @@ class ReviewController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        try {
+            //params
+            $rating = $req->input('rating');
+            $review = $req->input('review');
+
+            //query
+            $user = auth('sanctum')->user();
+            $reviews = Review::query();
+            switch ($user->currentAccessToken()->tokenable_type) {
+                case UserTailor::class:
+                    $reviews = Review::whereHas('tailor', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+                case UserCustomer::class:
+                    $reviews = Review::whereHas('customer', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+            }
+
+            if ($rating) {
+                $reviews = $reviews->where('rating', $rating);
+            }
+            if ($review) {
+                $reviews = $reviews->where('review', 'like', '%' . $review . '%');
+            }
+
+            $reviews = $reviews->get();
+
+            return ResponseFormatter::success($reviews, count($reviews) . " Data retrieved successfully");
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
+        }
     }
 
     public function getReviewOption(Request $req)

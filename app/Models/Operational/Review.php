@@ -15,8 +15,8 @@ class Review extends Model
     protected $guarded = ['id'];
 
     protected $with = [
-        'tailor',
-        'customer',
+        'tailor.profile',
+        'customer.profile',
     ];
 
     protected $hidden = [
