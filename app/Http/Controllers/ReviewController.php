@@ -24,7 +24,6 @@ class ReviewController extends Controller
         try {
             //params
             $rating = $req->input('rating');
-            $review = $req->input('review');
 
             //query
             $user = auth('sanctum')->user();
@@ -45,9 +44,6 @@ class ReviewController extends Controller
             if ($rating) {
                 $reviews = $reviews->where('rating', $rating);
             }
-            if ($review) {
-                $reviews = $reviews->where('review', 'like', '%' . $review . '%');
-            }
 
             $reviews = $reviews->get();
 
@@ -56,6 +52,7 @@ class ReviewController extends Controller
             return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
         }
     }
+
 
     public function getReviewOption(Request $req)
     {
@@ -118,7 +115,7 @@ class ReviewController extends Controller
 
             $validator = Validator::make($req->all(), [
                 'tailor' => 'required|uuid|exists:user_tailors,uuid',
-                'review' => 'nullable|string|exists:review_options,review',
+                'review' => 'nullable|array',
                 'rating' => 'required|integer|between:1,5',
                 'message' => 'nullable|string',
             ]);
@@ -134,6 +131,7 @@ class ReviewController extends Controller
             unset($data['tailor']);
 
             $review = Review::create($data);
+            $review->reviewOptions()->attach($data['review']);
 
             $review = Review::with(['customer.profile', 'tailor.profile'])->where('uuid', $review->uuid)->first();
 
@@ -149,9 +147,29 @@ class ReviewController extends Controller
      * @param  \App\Models\Operational\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function show(Review $review)
+    public function show(Request $req, $uuid)
     {
-        //
+        try {
+            $user = auth('sanctum')->user();
+            $review = Review::query();
+            switch ($user->currentAccessToken()->tokenable_type) {
+                case UserTailor::class:
+                    $review = Review::whereHas('tailor', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+                case UserCustomer::class:
+                    $review = Review::whereHas('customer', function ($query) {
+                        $query->where('uuid', auth()->user()->uuid);
+                    });
+                    break;
+            }
+            $review = $review->with(['customer.profile', 'tailor.profile'])->where('uuid', $uuid)->first();
+
+            return ResponseFormatter::success($review, 'Data review berhasil didapatkan');
+        } catch (\Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
+        }
     }
 
     /**

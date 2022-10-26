@@ -116,6 +116,7 @@ Route::controller(ReviewController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/review', 'store');
         Route::get('/review', 'index');
+        Route::get('/review/{uuid}', 'show');
     });
 });
 

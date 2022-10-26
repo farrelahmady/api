@@ -51,7 +51,6 @@ class ReviewSeeder extends Seeder
                     'user_tailor_id' => $tailor->uuid,
                     'user_customer_id' => UserCustomer::all()->random()->uuid,
                     'rating' => $rating,
-                    'review' => ReviewOption::where('rating', $rating)->get()->random()->review,
                     'message' => $faker->text
                 ]);
             }

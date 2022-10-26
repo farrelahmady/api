@@ -18,7 +18,6 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->foreignUuid('user_customer_id')->constrained('user_customers', 'uuid')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignUuid('user_tailor_id')->constrained("user_tailors", "uuid")->onUpdate('cascade')->onDelete('cascade');
-            $table->string('review')->nullable();
             $table->tinyInteger('rating');
             $table->text('message')->nullable();
             $table->timestamps();
