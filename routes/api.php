@@ -97,6 +97,7 @@ Route::controller(AppointmentController::class)->group(function () {
         Route::get('/appointment/{uuid}', 'show');
         Route::post('/appointment/{uuid}', 'update');
     });
+
     // Route::get('/appointment/{uuid}', 'show');
     // Route::put('/appointment/{uuid}', 'update');
     // Route::delete('/appointment/{uuid}', 'destroy');

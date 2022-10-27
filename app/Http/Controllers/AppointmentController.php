@@ -18,218 +18,7 @@ use App\Models\ManagementAccess\Availability;
 
 class AppointmentController extends Controller
 {
-    private function chart()
-    {
-        // * get all appointments in the current year
-        $appointment = Appointment::select("*")->whereBetween('created_at', [
-            now()->startOfYear(),
-            now()->endOfYear()
-        ])->get();
-        // * get all appointments in the current year
 
-        // * Structuring the data to be returned in the format required by the frontend
-        $data = new Collection([
-            "today" => new Collection(),
-            "this_week" => new Collection(),
-            "this_month" => new Collection(),
-            "this_year" => new Collection(),
-        ]);
-        foreach ($data as $key => $value) {
-            $data[$key]->put("total", 0);
-            $data[$key]->put("data", new Collection([
-                "labels" => new Collection(),
-                "values" => new Collection(),
-                "requested" => new Collection(),
-                "approved" => new Collection(),
-                "active" => new Collection(),
-                "done" => new Collection(),
-                "cancel" => new Collection(),
-            ]));
-        }
-        // * Structuring the data to be returned in the format required by the frontend
-
-
-        // * Calculating the total number of appointments for a day
-        $totalPerDay = new Collection();
-        $thisDay = $appointment->whereBetween('created_at', [
-            now()->startOfDay(),
-            now()->endOfDay()
-
-        ]);
-
-        $totalPerHour = $thisDay->groupBy(function ($item) {
-            return $item->created_at->format('H');
-        });
-
-
-        $data["today"]['total'] = $thisDay->count();
-        $startDay = now()->startOfDay();
-        $i = 0;
-        while ($startDay->isBefore(now()->endOfDay())) {
-            $data["today"]['data']['labels']->push($startDay->format('H'));
-            if (isset($totalPerHour[$startDay->format('H')])) {
-                $temp = $totalPerHour[$startDay->format('H')];
-                foreach ($data["today"]['data'] as $key => $value) {
-                    if ($key === "values") {
-                        $data["today"]['data'][$key]->push($temp->count());
-                    } else if ($key !== "labels") {
-                        $data["today"]['data'][$key]->push($temp->where('status', $key)->count());
-                    }
-                }
-            } else {
-                foreach ($data["today"]['data'] as $key => $value) {
-                    if ($key !== "labels") {
-                        $data["today"]['data'][$key]->push(isset($data["today"]['data'][$key][$i - 1]) ? $data["today"]['data'][$key][$i - 1] : 0);
-                    }
-                }
-            }
-            $i++;
-            $startDay->addHour();
-        }
-        // * Calculating the total number of appointments for a day
-
-
-
-        // * Calculating the total number of appointments for a week
-        $totalPerDay = new Collection();
-        $thisWeek = $appointment->whereBetween('created_at', [
-            now()->startOfWeek(),
-            now()->endOfWeek()
-        ]);
-
-        $totalPerDay = $thisWeek->groupBy(function ($item) {
-            return $item->created_at->format('D');
-        });
-
-        list($labels, $values) = Arr::divide($totalPerDay->toArray());
-
-        $data["this_week"]['total'] = $thisWeek->count();
-        $data["this_week"]['data'] = new Collection([
-            // "data" => $totalPerDay,
-            "labels" => new Collection(),
-            "values" => new Collection()
-        ]);
-
-        $startWeek = now()->startOfWeek();
-        $i = 0;
-        while ($startWeek->isBefore(now()->endOfWeek())) {
-            $data["this_week"]['data']['labels']->push($startWeek->format('D'));
-            if (isset($totalPerDay[$startWeek->format('D')])) {
-                $temp = $totalPerDay[$startWeek->format('D')];
-                foreach ($data["this_week"]['data'] as $key => $value) {
-                    if ($key === "values") {
-                        $data["this_week"]['data'][$key]->push($temp->count());
-                    } else if ($key !== "labels") {
-                        $data["this_week"]['data'][$key]->push($temp->where('status', $key)->count());
-                    }
-                }
-            } else {
-                foreach ($data["this_week"]['data'] as $key => $value) {
-                    if ($key !== "labels") {
-                        $data["this_week"]['data'][$key]->push(isset($data["this_week"]['data'][$key][$i - 1]) ? $data["this_week"]['data'][$key][$i - 1] : 0);
-                    }
-                }
-            }
-            $i++;
-            $startWeek->addDay();
-        }
-        // * Calculating the total number of appointments for a week
-
-
-        // * Calculating the total number of appointments for a month
-        $totalPerWeek = new Collection();
-        $thisMonth = $appointment->whereBetween(
-            'created_at',
-            [
-                now()->startOfMonth(),
-                now()->endOfMonth(),
-            ]
-        );
-
-        $totalPerWeek = $thisMonth->groupBy(function ($item) {
-            return $item->created_at->format('d');
-        });
-
-
-        $data['this_month']['total'] = $thisMonth->count();
-        $data['this_month']['data'] = new Collection([
-            // "weekly" => $totalPerWeek,
-            "labels" => new Collection(),
-            "values" => new Collection()
-        ]);
-
-        $startMonth = now()->startOfMonth();
-        $i = 0;
-        while ($startMonth->isBefore(now()->endOfMonth())) {
-            $data["this_month"]['data']['labels']->push($startMonth->format('d'));
-            if (isset($totalPerWeek[$startMonth->format('d')])) {
-                $temp = $totalPerWeek[$startMonth->format('d')];
-                foreach ($data["this_month"]['data'] as $key => $value) {
-                    if ($key === "values") {
-                        $data["this_month"]['data'][$key]->push($temp->count());
-                    } else if ($key !== "labels") {
-                        $data["this_month"]['data'][$key]->push($temp->where('status', $key)->count());
-                    }
-                }
-            } else {
-                foreach ($data["this_month"]['data'] as $key => $value) {
-                    if ($key !== "labels") {
-                        $data["this_month"]['data'][$key]->push(isset($data["this_month"]['data'][$key][$i - 1]) ? $data["this_month"]['data'][$key][$i - 1] : 0);
-                    }
-                }
-            }
-            $i++;
-            $startMonth->addDay();
-        }
-        // * Calculating the total number of appointments for a Month
-
-
-
-        // * Calculating the total number of appointments for a year
-        $thisYear = $appointment->whereBetween(
-            'created_at',
-            [
-                now()->startOfYear(),
-                now()->endOfYear(),
-            ]
-        );
-
-        $totalPerMonth = $thisYear->groupBy(function ($item) {
-            return $item->created_at->format('M');
-        });
-
-        $data['this_year']['total'] = $thisYear->count();
-        $data['this_year']['data'] = new Collection([
-            "labels" => new Collection(),
-            "values" => new Collection()
-        ]);
-
-        $startYear = now()->startOfYear();
-        // return $startYear->addMonth(11)->isBefore(now()->endOfYear());
-        $i = 0;
-        while ($startYear->isBefore(now()->endOfYear())) {
-            $data["this_year"]['data']['labels']->push($startYear->format('M'));
-            if (isset($totalPerMonth[$startYear->format('M')])) {
-                $temp = $totalPerMonth[$startYear->format('M')];
-                foreach ($data["this_year"]['data'] as $key => $value) {
-                    if ($key === "values") {
-                        $data["this_year"]['data'][$key]->push($temp->count());
-                    } else if ($key !== "labels") {
-                        $data["this_year"]['data'][$key]->push($temp->where('status', $key)->count());
-                    }
-                }
-            } else {
-                foreach ($data["this_year"]['data'] as $key => $value) {
-                    if ($key !== "labels") {
-                        $data["this_year"]['data'][$key]->push(isset($data["this_year"]['data'][$key][$i - 1]) ? $data["this_year"]['data'][$key][$i - 1] : 0);
-                    }
-                }
-            }
-
-            $i++;
-            $startYear->addMonth();
-        }
-    }
     public function index(Request $req)
     {
         try {
@@ -308,8 +97,159 @@ class AppointmentController extends Controller
         }
     }
 
+    public function chart()
+    {
+        try {
+            $status = ["requested", "approved", "active", "done", "cancel"];
+            // * get all appointments in the current year
+            $appointments = Appointment::select("*")->whereBetween('date', [
+                now()->startOfYear(),
+                now()->endOfYear()
+            ])->get();
+            // * get all appointments in the current year
+
+            // * Structuring the data to be returned in the format required by the frontend
+            $data = new Collection([
+                "this_week" => new Collection(),
+                "this_month" => new Collection(),
+                "this_year" => new Collection(),
+            ]);
+            foreach ($data as $key => $value) {
+                $data[$key]->put("total", 0);
+
+                $data[$key]->put("data", new Collection([
+                    "labels" => new Collection(),
+                    "values" => new Collection()
+                ]));
+
+                foreach ($status as $value) {
+                    $data[$key]['data']->put($value, new Collection());
+                }
+            }
+            // * Structuring the data to be returned in the format required by the frontend
+
+            // ! WEEKLY
+            // * Get data for this week
+            $thisWeekAppointment = $appointments->whereBetween(
+                'date',
+                [
+                    now()->startOfWeek(),
+                    now()->endOfWeek(),
+                ]
+            );
+
+            // * Set total data for this week
+            $data['this_week']['total'] = $thisWeekAppointment->count();
+
+            // * Group data by date
+            $thisWeekAppointment = $thisWeekAppointment->groupBy("date");
+
+            for ($i = now()->startOfWeek(); $i < now()->endOfWeek(); $i->addDay()) {
+                // * Set labels for this week
+                $day = $i->format('l');
+                $labels = $data["this_week"]['data']['labels'];
+                $labels->push($day);
+
+                // * Set values for this week
+                $values = $data["this_week"]["data"]["values"];
+                if ($thisWeekAppointment->has($i->format('Y-m-d'))) {
+                    $values->push($thisWeekAppointment[$i->format('Y-m-d')]->count());
+                    foreach ($status as $index => $value) {
+                        $data["this_week"]['data'][$value]->push($thisWeekAppointment[$i->format('Y-m-d')]->where('status', $index + 1)->count());
+                    }
+                } else {
+                    $values->push(0);
+                    foreach ($status as $value) {
+                        $data["this_week"]['data'][$value]->push(0);
+                    }
+                }
+            }
+            // ! WEEKLY
+
+            // ! MONTHLY
+            // * Get data for this month
+            $thisMonthAppointment = $appointments->whereBetween(
+                'date',
+                [
+                    now()->startOfMonth(),
+                    now()->endOfMonth(),
+                ]
+            );
+
+            // * Set total data for this month
+            $data['this_month']['total'] = $thisMonthAppointment->count();
+
+            // * Group data by date
+            $thisMonthAppointment = $thisMonthAppointment->groupBy("date");
+
+            for ($i = now()->startOfMonth(); $i < now()->endOfMonth(); $i->addDays()) {
+                // * Set labels for this month
+                $day = $i->format('Y-m-d');
+                $labels = $data["this_month"]['data']['labels'];
+                $labels->push($day);
+
+                // * Set values for this month
+                $values = $data["this_month"]["data"]["values"];
+                if ($thisMonthAppointment->has($i->format('Y-m-d'))) {
+                    $values->push($thisMonthAppointment[$i->format('Y-m-d')]->count());
+                    foreach ($status as $index => $value) {
+                        $data["this_month"]['data'][$value]->push($thisMonthAppointment[$i->format('Y-m-d')]->where('status', $index + 1)->count());
+                    }
+                } else {
+                    $values->push(0);
+                    foreach ($status as $value) {
+                        $data["this_month"]['data'][$value]->push(0);
+                    }
+                }
+            }
+            // ! MONTHLY
+
+            // ! YEARLY
+            // * Set total data for this month
+            $data['this_year']['total'] = $appointments->count();
+
+            // * Group data by date (MONTH)
+            $thisYearAppointment = $appointments->groupBy(function ($item) {
+                $date = Carbon::parse($item->date);
+                return $date->format('F');
+            });
+
+            for ($i = now()->startOfYear(); $i < now()->endOfYear(); $i->addMonth()) {
+                // * Set labels for this Year
+                $day = $i->format('F');
+                $labels = $data["this_year"]['data']['labels'];
+                $labels->push($day);
+
+                // * Set values for this Year
+                $values = $data["this_year"]["data"]["values"];
+                if ($thisYearAppointment->has($i->format('F'))) {
+                    $values->push($thisYearAppointment[$i->format('F')]->count());
+                    foreach ($status as $index => $value) {
+                        $data["this_year"]['data'][$value]->push($thisYearAppointment[$i->format('F')]->where('status', $index + 1)->count());
+                    }
+                } else {
+                    $values->push(0);
+                    foreach ($status as $value) {
+                        $data["this_year"]['data'][$value]->push(0);
+                    }
+                }
+            }
+            // ! YEARLY
+
+            return ResponseFormatter::success(
+                $data,
+                'Data retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return ResponseFormatter::error(data: $e->getMessage(), message: 'Something Went Wrong', code: 500);
+        }
+    }
+
     public function show($uuid)
     {
+        if ($uuid === "chart") {
+            return $this->chart();
+        }
         try {
             $data = Appointment::with(['tailor.profile', 'customer.profile'])->where('uuid', $uuid);
             switch (auth()->user()->currentAccessToken()->tokenable_type) {
