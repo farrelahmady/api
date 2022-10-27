@@ -89,13 +89,7 @@ class ReviewController extends Controller
      */
     public function create(Request $req)
     {
-        try {
-            $cust = auth()->user();
-
-            return $cust;
-        } catch (\Exception $e) {
-            return ResponseFormatter::error($e->getMessage(), "Terjadi Kesalahan Sistem", 500);
-        }
+        abort(404);
     }
 
     /**
@@ -116,6 +110,7 @@ class ReviewController extends Controller
             $validator = Validator::make($req->all(), [
                 'tailor' => 'required|uuid|exists:user_tailors,uuid',
                 'review' => 'nullable|array',
+                'review.*' => 'nullable|integer|exists:review_options,id',
                 'rating' => 'required|integer|between:1,5',
                 'message' => 'nullable|string',
             ]);
