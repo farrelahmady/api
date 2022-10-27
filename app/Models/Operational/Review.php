@@ -15,10 +15,10 @@ class Review extends Model
 
     protected $guarded = ['id'];
 
-    protected $with = [
-        'tailor.profile',
-        'customer.profile',
-    ];
+    //protected $with = [
+    //    'tailor.profile',
+    //    'customer.profile',
+    //];
 
     protected $hidden = [
         'deleted_at',

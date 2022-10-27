@@ -39,9 +39,11 @@ class AppointmentController extends Controller
             $data[$key]->put("data", new Collection([
                 "labels" => new Collection(),
                 "values" => new Collection(),
-                "pending" => new Collection(),
-                "confirmed" => new Collection(),
-                "cancelled" => new Collection(),
+                "requested" => new Collection(),
+                "approved" => new Collection(),
+                "active" => new Collection(),
+                "done" => new Collection(),
+                "cancel" => new Collection(),
             ]));
         }
         // * Structuring the data to be returned in the format required by the frontend

@@ -24,7 +24,7 @@ class UserTailor extends Authenticatable
 
     protected $appends = ['rating', 'total_review'];
 
-    // protected $with = ['profile'];
+    //protected $with = ['profile'];
 
     protected $casts = [
         'is_premium' => 'boolean',
@@ -66,6 +66,10 @@ class UserTailor extends Authenticatable
     {
         return 'uuid';
     }
+
+
+
+
 
 
     // public function sendPasswordResetNotification($token)

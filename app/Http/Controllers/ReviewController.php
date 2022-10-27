@@ -45,7 +45,7 @@ class ReviewController extends Controller
                 $reviews = $reviews->where('rating', $rating);
             }
 
-            $reviews = $reviews->get();
+            $reviews = $reviews->with(['tailor.profile', 'customer.profile'])->get();
 
             return ResponseFormatter::success($reviews, count($reviews) . " Data retrieved successfully");
         } catch (\Exception $e) {
