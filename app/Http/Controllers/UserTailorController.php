@@ -437,6 +437,7 @@ class UserTailorController extends Controller
                 'province' => ['nullable', 'string', 'max:255'],
                 'zip_code' => ['nullable', 'numeric', 'digits:5'],
                 'premium' => ['nullable', 'boolean'],
+                'is_ready' => ['nullable', 'boolean'],
             ]);
 
             if ($validator->fails()) {
@@ -465,6 +466,10 @@ class UserTailorController extends Controller
 
             if ($request->has('premium')) {
                 $userTailor->is_premium = $request->premium;
+            }
+
+            if ($request->has('is_ready')) {
+                $userTailor->is_ready = $request->is_ready;
             }
 
             if ($request->first_name) {
@@ -504,8 +509,12 @@ class UserTailorController extends Controller
             }
 
 
+
+
             $userTailor->save();
             $userTailor->profile->save();
+
+            $userTailor = UserTailor::with(['review.customer.profile'])->join('user_tailor_details', 'user_tailors.id', '=', 'user_tailor_details.user_tailor_id')->select('user_tailors.*', 'user_tailor_details.*', 'user_tailor_details.id as profile_id')->where('user_tailors.uuid', $uuid)->first();
 
             return ResponseFormatter::success($userTailor, 'User Tailor berhasil diperbarui');
         } catch (\Exception $e) {

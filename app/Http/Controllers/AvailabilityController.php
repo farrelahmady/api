@@ -11,6 +11,7 @@ use App\Models\Operational\Appointment;
 use App\Models\User\Admin as UserAdmin;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ManagementAccess\Availability;
+use App\Models\User\UserCustomer;
 
 class AvailabilityController extends Controller
 {
@@ -20,18 +21,71 @@ class AvailabilityController extends Controller
         try {
 
             $tailor = $req->input('tailor');
-            $data = collect();
-            if (count($req->all()) <= 0) {
-                if (!auth('sanctum')->check()) {
-                    return ResponseFormatter::error(message: 'Unauthorized', code: 401);
-                }
-                if (!in_array($req->user('sanctum')->uuid, UserAdmin::pluck('uuid')->toArray())) {
-                    return ResponseFormatter::error(["message" => "Kamu tidak memiliki akses"], 'Forbidden', 403);
-                }
-                $availability = Availability::all();
-            } else {
-                $availability = Availability::where('user_tailor_id', $tailor)->get();
+
+            $user = auth('sanctum')->user();
+            $availability = Availability::orderBy("date");
+            switch ($user->currentAccessToken()->tokenable_type) {
+                case UserCustomer::class:
+                    $validation = Validator::make($req->all(), [
+                        'tailor' => 'required|uuid|exists:user_tailors,uuid'
+                    ]);
+
+                    if ($validation->fails()) {
+                        return ResponseFormatter::error($validation->errors(), message: "Kesalahan input", code: 400);
+                    }
+                    $availability = $availability->where('user_tailor_id', $tailor)->get();
+                    break;
+
+                case UserTailor::class:
+                    $availability = $availability->where('user_tailor_id', $user->uuid)->get();
+                    $data = collect();
+                    $date = $availability->groupBy("date");
+                    $date->keys()->each(function ($item) use ($user, $date, $data) {
+                        $time = collect();
+                        $date[$item]->each(function ($item) use ($time, $user) {
+                            $time->push(["time" => $item->time, "booked" => Appointment::where('date', $item->date)->where('time', $item->time)->where('user_tailor_id', $user->uuid)->where('status', '<', 5)->get()->count() > 0 ? true : false]);
+                        });
+                        $data->push(
+                            [
+                                "date" => $item,
+                                "time" => $time,
+                            ]
+                        );
+                    });
+                    break;
+
+                default:
+                    $availability = $availability->get();
+                    $availability = $availability->groupBy('user_tailor_id');
+
+                    $data = collect();
+
+                    $availability->keys()->each(function ($key) use ($data, $availability, $user) {
+                        // return $availability;
+                        $schedule = collect();
+                        $date = $availability[$key]->groupBy("date");
+                        $date->keys()->each(function ($item) use ($key, $date, $schedule) {
+                            $time = collect();
+                            $date[$item]->each(function ($item) use ($time, $key) {
+                                $time->push(["time" => $item->time, "booked" => Appointment::where('date', $item->date)->where('time', $item->time)->where('user_tailor_id', $key)->where('status', '<', 5)->get()->count() > 0 ? true : false]);
+                            });
+                            $schedule->push(
+                                [
+                                    "date" => $item,
+                                    "time" => $time,
+                                ]
+                            );
+                        });
+
+                        $data->push([
+                            'user_tailor_id' => $key,
+                            'schedule' => $schedule,
+                        ]);
+                    });
+                    break;
             }
+
+
 
             if ($availability->count() <= 0) {
                 return ResponseFormatter::error(["message" => "Data tidak ditemukan"], 'Not Found', 404);
@@ -50,30 +104,8 @@ class AvailabilityController extends Controller
             //   ]);
             // });
 
-            $availability = $availability->groupBy('user_tailor_id');
 
-            $availability->keys()->each(function ($key) use ($data, $availability) {
-                // return $availability;
-                $schedule = collect();
-                $date = $availability[$key]->groupBy("date");
-                $date->keys()->each(function ($item) use ($key, $date, $schedule) {
-                    $time = collect();
-                    $date[$item]->each(function ($item) use ($time, $key) {
-                        $time->push(["time" => $item->time, "booked" => Appointment::where('date', $item->date)->where('time', $item->time)->where('user_tailor_id', $key)->where('status', '<', 5)->get()->count() > 0 ? true : false]);
-                    });
-                    $schedule->push(
-                        [
-                            "date" => $item,
-                            "time" => $time,
-                        ]
-                    );
-                });
 
-                $data->push([
-                    'user_tailor_id' => $key,
-                    'schedule' => $schedule,
-                ]);
-            });
 
             if ($tailor) {
                 $data = $data->where('user_tailor_id', $tailor)->first()["schedule"];
@@ -95,8 +127,8 @@ class AvailabilityController extends Controller
 
             $tailor = auth()->user();
 
-            $start = now()->startOfWeek();
-            $end = now()->addWeek()->endOfWeek();
+            $start = now();
+            $end = now()->addDay(14);
             $rule = is_array($req->time) ? [
                 'date' => "required|date|after_or_equal:$start|before_or_equal:$end",
                 'time' => 'required|array|max:' . $tailor->max_schedule_slot,
@@ -114,14 +146,16 @@ class AvailabilityController extends Controller
 
 
             $times = is_array($req->time) ? collect($req->time) : collect([$req->time]);
-            $dates = collect(Carbon::parse($req->date)->startOfWeek()->addDay());
+            $dates = collect([
+                $req->date
+            ]);
             if ($req->has('all')) {
-                $dateStart = Carbon::parse($req->date)->startOfWeek();
+                //$dates = collect(Carbon::parse($req->date)->startOfWeek()->addDay());
+                $dateStart = now();
                 while (!Carbon::parse($dates->last())->isSameDay(Carbon::parse($end))) {
                     $dates->push(Carbon::parse($dateStart->addDay()));
                 }
             } else {
-                $dates = collect([$req->date]);
             }
             $dates->each(function ($date) use ($tailor, $times) {
                 $times->each(function ($time) use ($tailor, $date) {
@@ -144,7 +178,7 @@ class AvailabilityController extends Controller
             });
 
 
-            $availability = Availability::where('user_tailor_id', $tailor->uuid)->get();
+            $availability = Availability::where('user_tailor_id', $tailor->uuid)->orderBy("date")->get();
 
 
 
@@ -165,7 +199,7 @@ class AvailabilityController extends Controller
 
 
 
-            return ResponseFormatter::success($schedule, $availability->count() . " Data berhasil diubah");
+            return ResponseFormatter::success($schedule, $availability->count() . " Jadwal berhasil diubah");
         } catch (\Exception $e) {
             return ResponseFormatter::error(message: $e->getMessage(), code: 500);
         }
