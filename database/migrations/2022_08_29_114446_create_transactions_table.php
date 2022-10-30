@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignUuid('user_tailor_id')->constrained("user_tailors", "uuid")->onUpdate(
                 'cascade'
             )->onDelete('cascade');
-            $table->string('transaction_code')->index();
+            $table->string('transaction_code')->unique();
             $table->float('gross_amount');
             $table->string('currency')->default('IDR');
             $table->string('category');
