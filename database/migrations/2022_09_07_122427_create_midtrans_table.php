@@ -40,8 +40,8 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists('midtrans');
-        Schema::table('midtrans', function (Blueprint $table) {
-            $table->dropForeign(['transaction_table_id']);
-        });
+        //Schema::table('midtrans', function (Blueprint $table) {
+        //    $table->dropForeign(['transaction_table_id']);
+        //});
     }
 };
