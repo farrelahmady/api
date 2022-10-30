@@ -68,6 +68,10 @@ Route::controller(UserCustomerController::class)->group(function () {
 Route::controller(CatalogController::class)->group(function () {
     Route::get('/catalog', 'index');
     Route::get('/catalog/{uuid}', 'show');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/catalog', 'store');
+        Route::post('/catalog/{uuid}', 'update');
+    });
 });
 
 Route::controller(AdminController::class)->group(function () {
