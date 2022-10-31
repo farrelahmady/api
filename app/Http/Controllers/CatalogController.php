@@ -199,7 +199,7 @@ class CatalogController extends Controller
                         $catalogItem->delete();
 
                         $path = substr($catalogItem->picture, strpos($catalogItem->picture, 'images'));
-                        return Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
+                        Storage::disk('public')->exists($path) ? Storage::disk('public')->delete($path) : "";
                     }
                 }
 
