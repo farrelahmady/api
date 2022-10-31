@@ -34,6 +34,21 @@ class AvailabilityController extends Controller
                         return ResponseFormatter::error($validation->errors(), message: "Kesalahan input", code: 400);
                     }
                     $availability = $availability->where('user_tailor_id', $tailor)->get();
+
+                    $data = collect();
+                    $date = $availability->groupBy("date");
+                    $date->keys()->each(function ($item) use ($user, $date, $data) {
+                        $time = collect();
+                        $date[$item]->each(function ($item) use ($time, $user) {
+                            $time->push(["time" => $item->time, "booked" => Appointment::where('date', $item->date)->where('time', $item->time)->where('user_tailor_id', $user->uuid)->where('status', '<', 5)->get()->count() > 0 ? true : false]);
+                        });
+                        $data->push(
+                            [
+                                "date" => $item,
+                                "time" => $time,
+                            ]
+                        );
+                    });
                     break;
 
                 case UserTailor::class:
@@ -59,7 +74,6 @@ class AvailabilityController extends Controller
                     $availability = $availability->groupBy('user_tailor_id');
 
                     $data = collect();
-
                     $availability->keys()->each(function ($key) use ($data, $availability, $user) {
                         // return $availability;
                         $schedule = collect();
@@ -82,6 +96,10 @@ class AvailabilityController extends Controller
                             'schedule' => $schedule,
                         ]);
                     });
+
+                    if ($tailor) {
+                        $data = $data->where('user_tailor_id', $tailor)->first()["schedule"];
+                    }
                     break;
             }
 
@@ -92,24 +110,7 @@ class AvailabilityController extends Controller
             }
 
 
-            // return ResponseFormatter::success($data, 'Data berhasil didapatkan');
-            // $availability->keys()->each(function ($item) use ($data, $availability) {
-            //   $time = collect();
-            //   $availability[$item]->each(function ($item) use ($time) {
-            //     $time->push($item->time);
-            //   });
-            //   $data->push([
-            //     'date' => $item,
-            //     'time' => $time
-            //   ]);
-            // });
 
-
-
-
-            if ($tailor) {
-                $data = $data->where('user_tailor_id', $tailor)->first()["schedule"];
-            }
 
 
             return ResponseFormatter::success($data, $data->count() . ' Data berhasil didapatkan');
