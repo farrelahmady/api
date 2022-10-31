@@ -127,8 +127,8 @@ class AvailabilityController extends Controller
 
             $tailor = auth()->user();
 
-            $start = now();
-            $end = now()->addDay(14);
+            $start = now()->startOfDay();
+            $end = now()->addDay(13)->endOfDay();
             $rule = is_array($req->time) ? [
                 'date' => "required|date|after_or_equal:$start|before_or_equal:$end",
                 'time' => 'required|array|max:' . $tailor->max_schedule_slot,
@@ -146,16 +146,20 @@ class AvailabilityController extends Controller
 
 
             $times = is_array($req->time) ? collect($req->time) : collect([$req->time]);
-            $dates = collect([
-                $req->date
-            ]);
+
             if ($req->has('all')) {
                 //$dates = collect(Carbon::parse($req->date)->startOfWeek()->addDay());
                 $dateStart = now();
+                $dates = collect([
+                    $start
+                ]);
                 while (!Carbon::parse($dates->last())->isSameDay(Carbon::parse($end))) {
                     $dates->push(Carbon::parse($dateStart->addDay()));
                 }
             } else {
+                $dates = collect([
+                    $req->date
+                ]);
             }
             $dates->each(function ($date) use ($tailor, $times) {
                 $times->each(function ($time) use ($tailor, $date) {
